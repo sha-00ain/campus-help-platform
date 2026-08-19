@@ -60,16 +60,16 @@ exports.searchDonors = async (req, res) => {
 exports.createRequest = async (req, res) => {
     try {
         const requester_id = req.user.user_id;
-        const { blood_group_needed, patient_name, hospital_location, units_needed, urgency_level } = req.body;
+        const { blood_group_needed, patient_name, hospital_location, units_needed, urgency_level, image } = req.body;
 
         if (!blood_group_needed || !hospital_location) {
             return res.status(400).json({ message: 'Blood group and hospital location are required.' });
         }
 
         const [result] = await db.query(
-            `INSERT INTO blood_requests (requester_id, blood_group_needed, patient_name, hospital_location, units_needed, urgency_level)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [requester_id, blood_group_needed, patient_name, hospital_location, units_needed || 1, urgency_level || 'normal']
+            `INSERT INTO blood_requests (requester_id, blood_group_needed, patient_name, hospital_location, units_needed, urgency_level, image)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [requester_id, blood_group_needed, patient_name, hospital_location, units_needed || 1, urgency_level || 'normal', image || null]
         );
 
         res.status(201).json({ message: 'Blood request posted!', request_id: result.insertId });

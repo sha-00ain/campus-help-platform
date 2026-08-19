@@ -8,11 +8,14 @@
 <body>
 
 <nav>
-    <div class="logo">🎓 Campus Help Platform</div>
+    <div class="nav-left">
+        <a class="back-arrow" onclick="goBack()">←</a>
+        <a class="logo" href="home.html">🎓 Campus Help Platform</a>
+    </div>
     <div>
-        <a href="dashboard.html">Dashboard</a>
-        <a href="lostfound.html">Lost & Found</a>
-        <a href="#" onclick="logout()">Logout</a>
+        <a class="navlink" href="lostfound.html">Lost & Found</a>
+        <a class="navlink" href="profile.html">👤 Profile</a>
+        <a class="navlink" href="#" onclick="logout()">Logout</a>
     </div>
 </nav>
 
@@ -60,6 +63,10 @@
                 <option value="urgent">Urgent</option>
                 <option value="critical">Critical</option>
             </select>
+
+            <label>Photo (optional)</label>
+            <input type="file" id="requestImage" accept="image/*">
+            <img id="requestImagePreview" style="display:none; max-width:150px; margin-top:8px; border-radius:8px;">
 
             <button type="submit">Post Request</button>
         </form>

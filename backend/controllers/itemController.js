@@ -7,16 +7,16 @@ const db = require('../config/db');
 exports.createItem = async (req, res) => {
     try {
         const posted_by = req.user.user_id;
-        const { item_type, category, title, description, location, date_occurred } = req.body;
+        const { item_type, category, title, description, location, date_occurred, image } = req.body;
 
         if (!item_type || !title) {
             return res.status(400).json({ message: 'Item type and title are required.' });
         }
 
         const [result] = await db.query(
-            `INSERT INTO items (posted_by, item_type, category, title, description, location, date_occurred)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [posted_by, item_type, category, title, description, location, date_occurred]
+            `INSERT INTO items (posted_by, item_type, category, title, description, location, date_occurred, image)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [posted_by, item_type, category, title, description, location, date_occurred, image || null]
         );
 
         res.status(201).json({ message: 'Item posted successfully!', item_id: result.insertId });

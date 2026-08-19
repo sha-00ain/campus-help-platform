@@ -41,7 +41,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         const data = await apiCall('/auth/login', 'POST', body, false);
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
-        window.location.href = 'dashboard.html';
+        window.location.href = 'home.html';
     } catch (err) {
         showMessage('msgBox', err.message, 'error');
     }

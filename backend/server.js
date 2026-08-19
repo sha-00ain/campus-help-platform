@@ -13,7 +13,7 @@ const itemRoutes = require('./routes/itemRoutes');
 const app = express();
 
 app.use(cors());              // allow frontend to call this backend
-app.use(express.json());      // allow reading JSON from request body
+app.use(express.json({ limit: '10mb' }));      // allow reading JSON from request body (10mb to allow images)
 
 // Routes
 app.use('/api/auth', authRoutes);

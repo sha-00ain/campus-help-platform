@@ -32,6 +32,7 @@ async function loadItems() {
                 <h4>${i.title}
                     <span class="tag ${i.item_type === 'found' ? 'found' : ''}">${i.item_type}</span>
                 </h4>
+                ${i.image ? `<img src="${i.image}" style="max-width:200px; border-radius:8px; margin:8px 0;">` : ''}
                 <p>${i.description || ''}</p>
                 <p><b>Category:</b> ${i.category || 'N/A'} | <b>Location:</b> ${i.location || 'N/A'}</p>
                 <p><b>Posted by:</b> ${i.posted_by_name} (${i.posted_by_phone || 'no phone'})</p>
@@ -55,21 +56,36 @@ async function claimItem(item_id) {
     }
 }
 
+// Show a small preview when user picks an image
+document.getElementById('itemImage').addEventListener('change', () => {
+    const file = document.getElementById('itemImage').files[0];
+    const preview = document.getElementById('itemImagePreview');
+    if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+});
+
 // Post a new item
 document.getElementById('itemForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
+        const image = await fileToBase64(document.getElementById('itemImage'));
         const body = {
             item_type: document.getElementById('item_type').value,
             category: document.getElementById('category').value,
             title: document.getElementById('title').value,
             description: document.getElementById('description').value,
             location: document.getElementById('location').value,
-            date_occurred: document.getElementById('date_occurred').value || null
+            date_occurred: document.getElementById('date_occurred').value || null,
+            image: image
         };
         await apiCall('/items', 'POST', body);
         showMessage('postMsg', 'Item posted successfully!', 'success');
         document.getElementById('itemForm').reset();
+        document.getElementById('itemImagePreview').style.display = 'none';
     } catch (err) {
         showMessage('postMsg', err.message, 'error');
     }

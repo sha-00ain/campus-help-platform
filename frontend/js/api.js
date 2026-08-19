@@ -3,7 +3,7 @@
 // ===================================================
 
 // Change this if your backend runs on a different port
-const API_BASE = 'https://campus-help-platform-d7ce.onrender.com/api';
+const API_BASE = 'http://localhost:5000/api';
 
 // Get the saved login token
 function getToken() {
@@ -20,6 +20,35 @@ function getUser() {
 function requireLogin() {
     if (!getToken()) {
         window.location.href = 'login.html';
+    }
+}
+
+// Convert a selected <input type="file"> image into a base64 string (or null if none chosen)
+function fileToBase64(inputElement) {
+    return new Promise((resolve, reject) => {
+        const file = inputElement.files[0];
+        if (!file) {
+            resolve(null);
+            return;
+        }
+        // keep images reasonably small - limit to 3MB
+        if (file.size > 3 * 1024 * 1024) {
+            reject(new Error('Image is too large. Please choose an image under 3MB.'));
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result); // includes "data:image/...;base64," prefix
+        reader.onerror = () => reject(new Error('Could not read the image file.'));
+        reader.readAsDataURL(file);
+    });
+}
+
+// Go back one page (used by the back arrow in nav). Falls back to home.html if no history.
+function goBack() {
+    if (document.referrer && document.referrer.includes(window.location.host)) {
+        window.history.back();
+    } else {
+        window.location.href = 'home.html';
     }
 }
 

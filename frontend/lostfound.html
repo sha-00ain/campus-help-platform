@@ -8,11 +8,14 @@
 <body>
 
 <nav>
-    <div class="logo">🎓 Campus Help Platform</div>
+    <div class="nav-left">
+        <a class="back-arrow" onclick="goBack()">←</a>
+        <a class="logo" href="home.html">🎓 Campus Help Platform</a>
+    </div>
     <div>
-        <a href="dashboard.html">Dashboard</a>
-        <a href="blood.html">Blood Donation</a>
-        <a href="#" onclick="logout()">Logout</a>
+        <a class="navlink" href="blood.html">Blood Donation</a>
+        <a class="navlink" href="profile.html">👤 Profile</a>
+        <a class="navlink" href="#" onclick="logout()">Logout</a>
     </div>
 </nav>
 
@@ -64,6 +67,10 @@
 
             <label>Date</label>
             <input type="date" id="date_occurred">
+
+            <label>Photo (optional)</label>
+            <input type="file" id="itemImage" accept="image/*">
+            <img id="itemImagePreview" style="display:none; max-width:150px; margin-top:8px; border-radius:8px;">
 
             <button type="submit">Post Item</button>
         </form>

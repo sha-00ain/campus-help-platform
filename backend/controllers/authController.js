@@ -80,3 +80,45 @@ exports.login = async (req, res) => {
         res.status(500).json({ message: 'Server error during login.' });
     }
 };
+
+// GET current logged-in user's full profile
+exports.getProfile = async (req, res) => {
+    try {
+        const user_id = req.user.user_id;
+        const [users] = await db.query(
+            `SELECT user_id, name, email, student_id, phone, blood_group, department, role, created_at
+             FROM users WHERE user_id = ?`,
+            [user_id]
+        );
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        res.json(users[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
+// UPDATE current logged-in user's profile
+exports.updateProfile = async (req, res) => {
+    try {
+        const user_id = req.user.user_id;
+        const { name, phone, blood_group, department, student_id } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ message: 'Name is required.' });
+        }
+
+        await db.query(
+            `UPDATE users SET name = ?, phone = ?, blood_group = ?, department = ?, student_id = ?
+             WHERE user_id = ?`,
+            [name, phone, blood_group, department, student_id, user_id]
+        );
+
+        res.json({ message: 'Profile updated successfully!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};

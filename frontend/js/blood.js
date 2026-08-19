@@ -25,6 +25,7 @@ async function loadRequests() {
                 <h4>${r.blood_group_needed} needed
                     <span class="tag ${r.urgency_level}">${r.urgency_level}</span>
                 </h4>
+                ${r.image ? `<img src="${r.image}" style="max-width:200px; border-radius:8px; margin:8px 0;">` : ''}
                 <p><b>Patient:</b> ${r.patient_name || 'N/A'}</p>
                 <p><b>Location:</b> ${r.hospital_location}</p>
                 <p><b>Units needed:</b> ${r.units_needed}</p>
@@ -47,20 +48,35 @@ async function respondToRequest(request_id) {
     }
 }
 
+// Show a small preview when user picks an image
+document.getElementById('requestImage').addEventListener('change', () => {
+    const file = document.getElementById('requestImage').files[0];
+    const preview = document.getElementById('requestImagePreview');
+    if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+});
+
 // Post a new blood request
 document.getElementById('requestForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
+        const image = await fileToBase64(document.getElementById('requestImage'));
         const body = {
             blood_group_needed: document.getElementById('blood_group_needed').value,
             patient_name: document.getElementById('patient_name').value,
             hospital_location: document.getElementById('hospital_location').value,
             units_needed: document.getElementById('units_needed').value,
-            urgency_level: document.getElementById('urgency_level').value
+            urgency_level: document.getElementById('urgency_level').value,
+            image: image
         };
         await apiCall('/blood/requests', 'POST', body);
         showMessage('postMsg', 'Request posted successfully!', 'success');
         document.getElementById('requestForm').reset();
+        document.getElementById('requestImagePreview').style.display = 'none';
     } catch (err) {
         showMessage('postMsg', err.message, 'error');
     }

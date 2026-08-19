@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Home - Campus Help Platform</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-left">
+        <a class="logo" href="home.html">🎓 Campus Help Platform</a>
+    </div>
+    <div>
+        <a class="navlink" href="profile.html">👤 Profile</a>
+        <a class="navlink" href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="card" style="text-align:center;">
+        <h2 id="welcomeMsg">Welcome!</h2>
+        <p>Here's what's happening on campus right now.</p>
+    </div>
+
+    <!-- Category shortcuts -->
+    <div class="category-section">
+        <a href="blood.html" class="category-box">
+            <div class="icon">🩸</div>
+            <h4>Blood Donation</h4>
+            <p style="font-size:13px;">Find donors or post a request</p>
+        </a>
+        <a href="lostfound.html" class="category-box">
+            <div class="icon">🎒</div>
+            <h4>Lost & Found</h4>
+            <p style="font-size:13px;">Browse or post items</p>
+        </a>
+        <div class="future-box">
+            <div class="icon">✨</div>
+            <h4>More features</h4>
+            <p>coming soon</p>
+        </div>
+    </div>
+
+    <!-- Live feed -->
+    <div class="card">
+        <h2>📢 Latest Activity</h2>
+        <div id="feedList">Loading feed...</div>
+    </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>

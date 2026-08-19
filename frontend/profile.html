@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Profile - Campus Help Platform</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="nav-left">
+        <a class="back-arrow" onclick="goBack()">←</a>
+        <a class="logo" href="home.html">🎓 Campus Help Platform</a>
+    </div>
+    <div>
+        <a class="navlink" href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="card">
+        <div class="profile-header">
+            <div class="profile-avatar" id="avatarInitial">?</div>
+            <div>
+                <h2 id="profileName">Loading...</h2>
+                <p id="profileEmail" style="color:#777; font-size:14px;"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Edit Profile</h2>
+        <div id="msgBox"></div>
+
+        <form id="profileForm">
+            <label>Full Name</label>
+            <input type="text" id="name" required>
+
+            <label>Email (cannot be changed)</label>
+            <input type="email" id="email" disabled>
+
+            <label>Student/Staff ID</label>
+            <input type="text" id="student_id">
+
+            <label>Phone</label>
+            <input type="text" id="phone">
+
+            <label>Blood Group</label>
+            <select id="blood_group">
+                <option value="">-- Select --</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>O+</option><option>O-</option>
+                <option>AB+</option><option>AB-</option>
+            </select>
+
+            <label>Department</label>
+            <input type="text" id="department">
+
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>
