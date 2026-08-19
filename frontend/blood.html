@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Blood Donation - Campus Help Platform</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="logo">🎓 Campus Help Platform</div>
+    <div>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="lostfound.html">Lost & Found</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="tabs">
+        <a href="#" class="active" onclick="showSection('requestsSection')">📋 View Requests</a>
+        <a href="#" onclick="showSection('postSection')">➕ Post Request</a>
+        <a href="#" onclick="showSection('searchSection')">🔍 Search Donors</a>
+        <a href="#" onclick="showSection('donorSection')">🩸 Become a Donor</a>
+    </div>
+
+    <!-- View open blood requests -->
+    <div class="card" id="requestsSection">
+        <h2>Open Blood Requests</h2>
+        <div id="requestsList">Loading...</div>
+    </div>
+
+    <!-- Post a new blood request -->
+    <div class="card" id="postSection" style="display:none;">
+        <h2>Post a Blood Request</h2>
+        <div id="postMsg"></div>
+        <form id="requestForm">
+            <label>Blood Group Needed</label>
+            <select id="blood_group_needed" required>
+                <option value="">-- Select --</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>O+</option><option>O-</option>
+                <option>AB+</option><option>AB-</option>
+            </select>
+
+            <label>Patient Name</label>
+            <input type="text" id="patient_name">
+
+            <label>Hospital / Location</label>
+            <input type="text" id="hospital_location" required>
+
+            <label>Units Needed</label>
+            <input type="number" id="units_needed" value="1" min="1">
+
+            <label>Urgency</label>
+            <select id="urgency_level">
+                <option value="normal">Normal</option>
+                <option value="urgent">Urgent</option>
+                <option value="critical">Critical</option>
+            </select>
+
+            <button type="submit">Post Request</button>
+        </form>
+    </div>
+
+    <!-- Search donors -->
+    <div class="card" id="searchSection" style="display:none;">
+        <h2>Search Donors</h2>
+        <label>Blood Group</label>
+        <select id="searchBloodGroup">
+            <option value="">-- Any --</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>O+</option><option>O-</option>
+            <option>AB+</option><option>AB-</option>
+        </select>
+        <label>Location</label>
+        <input type="text" id="searchLocation" placeholder="e.g. Hostel 3, Dhaka">
+        <button onclick="searchDonors()">Search</button>
+        <div id="donorResults" style="margin-top:20px;"></div>
+    </div>
+
+    <!-- Become a donor -->
+    <div class="card" id="donorSection" style="display:none;">
+        <h2>Become a Donor</h2>
+        <div id="donorMsg"></div>
+        <label>Your current location (for donor search)</label>
+        <input type="text" id="donorLocation" placeholder="e.g. Hostel 3, Dhaka">
+        <button onclick="becomeDonor()">Register as Donor</button>
+    </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/blood.js"></script>
+</body>
+</html>

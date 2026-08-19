@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard - Campus Help Platform</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="logo">🎓 Campus Help Platform</div>
+    <div>
+        <a href="blood.html">Blood Donation</a>
+        <a href="lostfound.html">Lost & Found</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <h2 id="welcomeMsg">Welcome!</h2>
+        <p>Choose what you'd like to do:</p>
+        <div style="margin-top:20px; display:flex; gap:15px;">
+            <button onclick="window.location.href='blood.html'">🩸 Blood Donation</button>
+            <button class="secondary" onclick="window.location.href='lostfound.html'">🎒 Lost & Found</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+requireLogin();
+const user = getUser();
+document.getElementById('welcomeMsg').innerText = `Welcome, ${user.name}!`;
+</script>
+
+</body>
+</html>

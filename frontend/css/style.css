@@ -1,0 +1,87 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+body { background: #f4f6f9; color: #222; }
+
+nav {
+    background: #b3001b;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+nav .logo { color: white; font-size: 20px; font-weight: bold; }
+nav a { color: white; text-decoration: none; margin-left: 20px; font-size: 14px; }
+nav a:hover { text-decoration: underline; }
+
+.container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+h2 { margin-bottom: 15px; color: #b3001b; }
+
+label { display: block; margin-top: 12px; margin-bottom: 4px; font-size: 14px; font-weight: 600; }
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+textarea { resize: vertical; min-height: 70px; }
+
+button {
+    margin-top: 18px;
+    background: #b3001b;
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+}
+button:hover { background: #8c0015; }
+button.secondary { background: #444; }
+button.secondary:hover { background: #222; }
+
+.item-box {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 12px;
+    background: #fafafa;
+}
+.item-box h4 { color: #b3001b; margin-bottom: 5px; }
+.tag {
+    display: inline-block;
+    background: #b3001b;
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+}
+.tag.urgent { background: #ff9900; }
+.tag.critical { background: #d10000; }
+.tag.found { background: #1a7a3c; }
+
+.msg { padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
+.msg.success { background: #d4f7dc; color: #1a7a3c; }
+.msg.error { background: #fbd6d6; color: #b3001b; }
+
+.tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+.tabs a {
+    padding: 8px 16px;
+    background: white;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #333;
+    border: 1px solid #ddd;
+    font-size: 14px;
+}
+.tabs a.active { background: #b3001b; color: white; border-color: #b3001b; }

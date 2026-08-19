@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lost & Found - Campus Help Platform</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav>
+    <div class="logo">🎓 Campus Help Platform</div>
+    <div>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="blood.html">Blood Donation</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+
+    <div class="tabs">
+        <a href="#" class="active" onclick="showSection('browseSection')">🔍 Browse Items</a>
+        <a href="#" onclick="showSection('postSection')">➕ Post Item</a>
+        <a href="#" onclick="showSection('claimsSection')">📥 Claims on My Items</a>
+    </div>
+
+    <!-- Browse items -->
+    <div class="card" id="browseSection">
+        <h2>Browse Lost & Found Items</h2>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <select id="filterType" onchange="loadItems()">
+                <option value="">All</option>
+                <option value="lost">Lost</option>
+                <option value="found">Found</option>
+            </select>
+            <input type="text" id="filterKeyword" placeholder="Search keyword...">
+            <button onclick="loadItems()">Search</button>
+        </div>
+        <div id="itemsList">Loading...</div>
+    </div>
+
+    <!-- Post item -->
+    <div class="card" id="postSection" style="display:none;">
+        <h2>Post a Lost or Found Item</h2>
+        <div id="postMsg"></div>
+        <form id="itemForm">
+            <label>Type</label>
+            <select id="item_type" required>
+                <option value="lost">Lost</option>
+                <option value="found">Found</option>
+            </select>
+
+            <label>Category</label>
+            <input type="text" id="category" placeholder="e.g. Electronics, Bag, Documents">
+
+            <label>Title</label>
+            <input type="text" id="title" required placeholder="e.g. Black backpack">
+
+            <label>Description</label>
+            <textarea id="description" placeholder="Describe the item in detail..."></textarea>
+
+            <label>Location</label>
+            <input type="text" id="location" placeholder="e.g. Library, 2nd floor">
+
+            <label>Date</label>
+            <input type="date" id="date_occurred">
+
+            <button type="submit">Post Item</button>
+        </form>
+    </div>
+
+    <!-- Claims on my items -->
+    <div class="card" id="claimsSection" style="display:none;">
+        <h2>Claim Requests on My Items</h2>
+        <div id="claimsList">Loading...</div>
+    </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/lostfound.js"></script>
+</body>
+</html>
