@@ -3,7 +3,7 @@
 // ===================================================
 
 // Change this if your backend runs on a different port
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://campus-help-platform-d7ce.onrender.com/api';
 
 // Get the saved login token
 function getToken() {
