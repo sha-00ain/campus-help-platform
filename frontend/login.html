@@ -1,52 +1,447 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Login - Campus Help Platform</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Campus Help · Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f7f9fc;
+      --card-bg: #ffffff;
+      --primary: #1e5eff;
+      --primary-dark: #1749d0;
+      --primary-soft: #e9efff;
+      --text-dark: #0b1b33;
+      --text-muted: #4a5b6e;
+      --border: #e2e8f0;
+      --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 16px 32px rgba(0, 0, 0, 0.07);
+      --radius: 22px;
+      --topbar-height: 76px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-dark);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Topbar with fixed positioning and smart scroll */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+      transform: translateY(0);
+      height: var(--topbar-height);
+    }
+
+    .topbar.hidden {
+      transform: translateY(-100%);
+      box-shadow: none;
+    }
+
+    /* Add padding to body to prevent content from hiding behind fixed topbar */
+    body {
+      padding-top: var(--topbar-height);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon {
+      background: var(--primary);
+      color: white;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 6px 14px rgba(30, 95, 255, 0.25);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      padding: 0.5rem 0.8rem;
+      border-radius: 30px;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-links a:hover {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .nav-links a.active-link {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 6px 12px rgba(30, 95, 255, 0.25);
+    }
+
+    .auth-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2.5rem 1.5rem;
+      min-height: calc(100vh - var(--topbar-height));
+    }
+
+    .auth-card {
+      background: var(--card-bg);
+      border-radius: 28px;
+      box-shadow: var(--shadow-md);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 480px;
+      border: 1px solid var(--border);
+    }
+
+    .auth-card h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .auth-card .subhead {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+      color: var(--text-dark);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.85rem 1.2rem;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      font-size: 0.95rem;
+      background: #fafcff;
+      transition: 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(30, 95, 255, 0.1);
+    }
+
+    .password-field {
+      position: relative;
+    }
+
+    .password-field input {
+      padding-right: 3rem;
+    }
+
+    .password-field i {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8a99aa;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.9rem;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 40px;
+      cursor: pointer;
+      margin-top: 1rem;
+      box-shadow: 0 10px 20px rgba(30, 95, 255, 0.25);
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(30, 95, 255, 0.35);
+    }
+
+    .optional-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.8rem;
+      text-align: center;
+    }
+
+    hr {
+      margin: 1.5rem 0 1rem;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #7a8b9f;
+      font-size: 0.8rem;
+      letter-spacing: 0.3px;
+    }
+
+    .msg-box {
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .msg-box.error { background: #fdeaea; color: #d32f2f; }
+
+    /* Add some extra height to demonstrate scrolling */
+    .demo-spacer {
+      height: 100px;
+    }
+
+    @media (max-width: 550px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        height: auto;
+        min-height: var(--topbar-height);
+        padding: 0.8rem 1rem;
+      }
+      .auth-card {
+        padding: 2rem 1.5rem;
+      }
+      body {
+        padding-top: 90px;
+      }
+      :root {
+        --topbar-height: 90px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<nav>
-    <div class="logo">🎓 Campus Help Platform</div>
-    <div><a href="index.html">Home</a><a href="register.html">Register</a></div>
-</nav>
-
-<div class="container">
-    <div class="card">
-        <h2>Login</h2>
-        <div id="msgBox"></div>
-
-        <form id="loginForm">
-            <label>Email</label>
-            <input type="email" id="email" required>
-
-            <label>Password</label>
-            <input type="password" id="password" required>
-
-            <button type="submit">Login</button>
-        </form>
+  <!-- Top bar: logo + navigation (Login active) with smart scroll -->
+  <header class="topbar" id="topbar">
+    <div class="logo-area">
+      <span class="logo-icon"><i class="fas fa-graduation-cap"></i></span>
+      <span>Campus<span style="color: var(--primary);">Help</span></span>
     </div>
-</div>
+    <nav class="nav-links">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="#" class="active-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+      <a href="register.html"><i class="fas fa-user-plus"></i> Register</a>
+    </nav>
+  </header>
 
-<script src="js/api.js"></script>
-<script>
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    try {
-        const body = {
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value
-        };
-        const data = await apiCall('/auth/login', 'POST', body, false);
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        window.location.href = 'home.html';
-    } catch (err) {
-        showMessage('msgBox', err.message, 'error');
-    }
-});
-</script>
+  <!-- Login form -->
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <h2><i class="fas fa-lock-open" style="color: var(--primary);"></i> Login</h2>
+      <div class="subhead">Welcome back! Please enter your details.</div>
+      <div id="msgBox"></div>
 
+      <div class="form-group">
+        <label for="loginEmail"><i class="fas fa-envelope" style="margin-right: 6px;"></i>Email</label>
+        <input type="email" id="loginEmail" placeholder="yourname@hamdarduniversity.edu.bd" value="">
+      </div>
+      
+      <div class="form-group">
+        <label for="loginPassword"><i class="fas fa-key" style="margin-right: 6px;"></i>Password</label>
+        <div class="password-field">
+          <input type="password" id="loginPassword" placeholder="••••••••" value="">
+          <i class="fas fa-eye"></i>
+        </div>
+      </div>
+      
+      <button class="btn-submit" id="loginBtn"><i class="fas fa-arrow-right-to-bracket"></i> Login</button>
+      <div class="optional-note">New here? <a href="register.html" style="color: var(--primary); font-weight: 600; text-decoration:none;">Create an account</a></div>
+      <hr />
+      <div class="footer-note"><i class="fas fa-university"></i> Campus Help · secure access</div>
+    </div>
+  </div>
+
+  <!-- Demo spacer to show scroll behavior -->
+  <div style="height: 100vh; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.9rem; padding: 2rem; text-align: center; border-top: 1px solid var(--border); margin: 0 2rem;">
+    <div>
+      <i class="fas fa-arrow-down" style="display: block; font-size: 2rem; margin-bottom: 1rem; color: var(--primary);"></i>
+      Scroll down to hide the topbar<br>
+      <span style="font-size: 0.8rem; opacity: 0.7;">Scroll up to show it again</span>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    (function() {
+      // DOM elements
+      const emailInput = document.getElementById('loginEmail');
+      const passwordInput = document.getElementById('loginPassword');
+      const loginBtn = document.getElementById('loginBtn');
+      const toggleIcon = document.querySelector('.password-field i');
+      const topbar = document.getElementById('topbar');
+      const msgBox = document.getElementById('msgBox');
+
+      // 1) Smart scroll behavior for topbar
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+
+      function handleScroll() {
+        const currentScrollY = window.scrollY;
+        const topbarHeight = topbar.offsetHeight;
+        if (currentScrollY > lastScrollY && currentScrollY > topbarHeight) {
+          topbar.classList.add('hidden');
+        } else if (currentScrollY < lastScrollY) {
+          topbar.classList.remove('hidden');
+        }
+        lastScrollY = currentScrollY;
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          window.requestAnimationFrame(handleScroll);
+          ticking = true;
+        }
+      });
+
+      window.addEventListener('load', function() {
+        if (window.scrollY > topbar.offsetHeight) {
+          topbar.classList.add('hidden');
+        } else {
+          topbar.classList.remove('hidden');
+        }
+      });
+
+      // 2) Toggle password visibility
+      if (toggleIcon) {
+        toggleIcon.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (!passwordInput) return;
+          if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            this.classList.remove('fa-eye');
+            this.classList.add('fa-eye-slash');
+          } else {
+            passwordInput.type = 'password';
+            this.classList.remove('fa-eye-slash');
+            this.classList.add('fa-eye');
+          }
+        });
+      }
+
+      // 3) Handle real login
+      async function attemptLogin() {
+        msgBox.innerHTML = '';
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!email) {
+          msgBox.innerHTML = '<div class="msg-box error">Please enter your email address.</div>';
+          emailInput.focus();
+          return;
+        }
+        if (!email.toLowerCase().endsWith('@hamdarduniversity.edu.bd')) {
+          msgBox.innerHTML = '<div class="msg-box error">Only @hamdarduniversity.edu.bd emails are allowed to login.</div>';
+          emailInput.focus();
+          return;
+        }
+        if (!password) {
+          msgBox.innerHTML = '<div class="msg-box error">Please enter your password.</div>';
+          passwordInput.focus();
+          return;
+        }
+
+        try {
+          const data = await apiCall('/auth/login', 'POST', { email, password }, false);
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = 'home.html';
+        } catch (err) {
+          msgBox.innerHTML = `<div class="msg-box error">${err.message}</div>`;
+        }
+      }
+
+      loginBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        attemptLogin();
+      });
+
+      // 4) Also allow "Enter" key on inputs to trigger login
+      function handleKeyPress(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          attemptLogin();
+        }
+      }
+      emailInput.addEventListener('keydown', handleKeyPress);
+      passwordInput.addEventListener('keydown', handleKeyPress);
+    })();
+  </script>
 </body>
 </html>

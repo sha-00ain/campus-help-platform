@@ -1,37 +1,455 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Campus Help Platform</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Campus Help · Smart header</title>
+  <!-- Google Font & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f7f9fc;
+      --card-bg: #ffffff;
+      --primary: #1e5eff;
+      --primary-soft: #e9efff;
+      --text-dark: #0b1b33;
+      --text-muted: #4a5b6e;
+      --border: #e2e8f0;
+      --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 12px 28px rgba(0, 0, 0, 0.05);
+      --radius: 22px;
+      --header-height: 72px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-dark);
+      line-height: 1.5;
+      padding: 0 0 2rem 0;
+    }
+
+    /* ===== sticky header ===== */
+    .sticky-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: var(--header-height);
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+      z-index: 999;
+      transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: flex;
+      align-items: center;
+    }
+
+    /* when hidden (scrolling down) */
+    .sticky-header.header-hidden {
+      transform: translateY(-100%);
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon {
+      background: var(--primary);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      box-shadow: 0 6px 14px rgba(30, 95, 255, 0.25);
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      padding: 0.55rem 1.3rem;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      cursor: default;
+      transition: 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-solid {
+      background: var(--primary);
+      border: 1.5px solid var(--primary);
+      padding: 0.55rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: white;
+      cursor: default;
+      box-shadow: 0 8px 16px rgba(30, 95, 255, 0.2);
+    }
+
+    /* main content offset */
+    .page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: calc(var(--header-height) + 1.5rem) 1.5rem 2rem;
+    }
+
+    /* hero */
+    .hero {
+      text-align: center;
+      margin: 2rem 0 2.8rem;
+    }
+
+    .hero h1 {
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.8rem;
+      background: linear-gradient(145deg, #0b1b33 20%, #1e5eff 80%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 1.8rem;
+    }
+
+    .cta-primary {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.9rem 2.3rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 40px;
+      box-shadow: 0 12px 22px rgba(30, 95, 255, 0.25);
+      cursor: default;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.15s;
+    }
+
+    /* category cards */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.8rem;
+      margin: 3rem 0 4rem;
+    }
+
+    .category-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 2rem 1.8rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+      transition: 0.2s;
+    }
+
+    .card-icon {
+      font-size: 2.8rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .category-card h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    .category-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-card {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: none;
+      padding: 0.6rem 1.4rem;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: default;
+      display: inline-block;
+    }
+
+    /* upcoming features */
+    .upcoming-section {
+      margin-top: 2rem;
+    }
+
+    .upcoming-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .upcoming-header i {
+      font-size: 1.8rem;
+      color: var(--primary);
+    }
+
+    .upcoming-header h2 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .feature-item {
+      background: white;
+      border-radius: 20px;
+      padding: 1.6rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .feature-number {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-soft);
+      display: inline-block;
+      width: fit-content;
+      padding: 0.15rem 0.7rem;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-top: 0.2rem;
+    }
+
+    .feature-item h3 {
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-top: 0.3rem;
+    }
+
+    .feature-item p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    hr {
+      margin: 2.5rem 0 1.5rem;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-note {
+      text-align: center;
+      color: #7a8b9f;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+    }
+
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+      .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.5rem 1rem;
+      }
+      .sticky-header {
+        height: auto;
+        min-height: 70px;
+      }
+      .page-wrap {
+        padding-top: 9rem;
+      }
+      .auth-buttons {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<nav>
-    <div class="logo">🎓 Campus Help Platform</div>
-    <div>
-        <a href="login.html">Login</a>
-        <a href="register.html">Register</a>
+  <!-- Sticky header that hides on scroll down and shows on scroll up -->
+  <header class="sticky-header" id="smartHeader">
+    <div class="header-inner">
+      <div class="logo-area">
+        <span class="logo-icon"><i class="fas fa-graduation-cap"></i></span>
+        <span>Campus<span style="color: var(--primary);">Help</span></span>
+      </div>
+      <div class="auth-buttons">
+        <a href="login.html" class="btn-outline" style="text-decoration:none; display:inline-flex; align-items:center;"><i class="fas fa-sign-in-alt" style="margin-right: 6px;"></i>Login</a>
+        <a href="register.html" class="btn-solid" style="text-decoration:none; display:inline-flex; align-items:center;"><i class="fas fa-user-plus" style="margin-right: 6px;"></i>Register</a>
+      </div>
     </div>
-</nav>
+  </header>
 
-<div class="container">
-    <div class="card" style="text-align:center;">
-        <h2>Welcome!</h2>
-        <p style="margin-bottom:20px;">A platform to help each other on campus — donate blood, find lost items, and more.</p>
-        <button onclick="window.location.href='register.html'">Get Started</button>
-    </div>
+  <div class="page-wrap">
+    <!-- Hero Welcome -->
+    <section class="hero">
+      <h1>Welcome!</h1>
+      <p>A platform to help each other on campus — donate blood, find lost items, and more.</p>
+      <button class="cta-primary" onclick="window.location.href='register.html'">
+        <i class="fas fa-hands-helping"></i> Get Started
+      </button>
+    </section>
 
-    <div class="card">
-        <h2>🩸 Blood Donation</h2>
+    <!-- Main category cards: Blood Donation & Lost & Found -->
+    <div class="category-grid">
+      <div class="category-card">
+        <div class="card-icon">🩸</div>
+        <h3>Blood Donation</h3>
         <p>Search for donors nearby, or post a request when someone needs blood urgently.</p>
-    </div>
-
-    <div class="card">
-        <h2>🎒 Lost & Found</h2>
+        <span class="btn-card" onclick="window.location.href='login.html'" style="cursor:pointer;"><i class="fas fa-search" style="margin-right: 6px;"></i>Find donors</span>
+      </div>
+      <div class="category-card">
+        <div class="card-icon">🎒</div>
+        <h3>Lost & Found</h3>
         <p>Lost something on campus? Or found something? Post it here and help reconnect items with their owners.</p>
+        <span class="btn-card" onclick="window.location.href='login.html'" style="cursor:pointer;"><i class="fas fa-box-open" style="margin-right: 6px;"></i>Browse items</span>
+      </div>
     </div>
-</div>
 
+    <!-- Upcoming features -->
+    <section class="upcoming-section">
+      <div class="upcoming-header">
+        <i class="fas fa-sparkles"></i>
+        <h2>More features coming soon</h2>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <span class="feature-number">1</span>
+          <div class="feature-icon">🚨</div>
+          <h3>Emergency / SOS Alert</h3>
+          <p>Send a quick alert to nearby users during a campus emergency, accident, or health issue.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-number">2</span>
+          <div class="feature-icon">🛒</div>
+          <h3>Campus Marketplace</h3>
+          <p>Buy and sell second-hand books, calculators, laptops, and other items within campus.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-number">3</span>
+          <div class="feature-icon">📅</div>
+          <h3>Event & Volunteer Management</h3>
+          <p>Organize blood donation camps, Lost & Found drives, and other community service events.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-number">4</span>
+          <div class="feature-icon">💬</div>
+          <h3>Community Feed / Forum</h3>
+          <p>A general discussion board for announcements and campus-wide conversations.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-number">5</span>
+          <div class="feature-icon">⭐</div>
+          <h3>Rating & Trust System</h3>
+          <p>Reliability ratings for donors and honest-finder badges for Lost & Found users.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-number">6</span>
+          <div class="feature-icon">🗺️</div>
+          <h3>Map Integration</h3>
+          <p>Visualize blood requests and lost/found items on a live campus map.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr />
+    <div class="footer-note">
+      <i class="fas fa-university" style="margin-right: 6px;"></i> Campus Help · student community & safety
+    </div>
+  </div>
+
+  <!-- Smart header hide/show on scroll -->
+  <script>
+    (function() {
+      const header = document.getElementById('smartHeader');
+      if (!header) return;
+
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+
+      function updateHeader() {
+        const currentScrollY = window.scrollY;
+
+        // Show header when scrolling up (or near top)
+        if (currentScrollY < lastScrollY || currentScrollY < 10) {
+          header.classList.remove('header-hidden');
+        } 
+        // Hide header when scrolling down and scroll distance is significant (past header height)
+        else if (currentScrollY > lastScrollY && currentScrollY > 80) {
+          header.classList.add('header-hidden');
+        }
+
+        lastScrollY = currentScrollY;
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          window.requestAnimationFrame(updateHeader);
+          ticking = true;
+        }
+      });
+
+      // initial check (in case page loads scrolled)
+      updateHeader();
+    })();
+  </script>
 </body>
 </html>

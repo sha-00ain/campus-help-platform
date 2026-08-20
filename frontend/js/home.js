@@ -49,7 +49,12 @@ async function loadFeed() {
         );
 
         if (allPosts.length === 0) {
-            container.innerHTML = '<p>No posts yet. Be the first to post something!</p>';
+            container.innerHTML = `
+                <div class="empty-feed">
+                    <i class="fas fa-inbox"></i>
+                    <h3>No posts yet</h3>
+                    <p>Be the first to share something with the campus community!</p>
+                </div>`;
             return;
         }
 
@@ -62,9 +67,9 @@ async function loadFeed() {
                             <span class="feed-post-time">${timeAgo(post.created_at)}</span>
                         </div>
                         <h4>${post.blood_group_needed} needed
-                            <span class="tag ${post.urgency_level}">${post.urgency_level}</span>
+                            <span class="urgency-tag ${post.urgency_level}">${post.urgency_level}</span>
                         </h4>
-                        ${post.image ? `<img src="${post.image}" style="max-width:250px; border-radius:8px; margin:8px 0;">` : ''}
+                        ${post.image ? `<img src="${post.image}" style="max-width:250px; border-radius:12px; margin:8px 0;">` : ''}
                         <p><b>Patient:</b> ${post.patient_name || 'N/A'}</p>
                         <p><b>Location:</b> ${post.hospital_location}</p>
                         <div class="feed-meta">Posted by ${post.requester_name}</div>
@@ -78,7 +83,7 @@ async function loadFeed() {
                             <span class="feed-post-time">${timeAgo(post.created_at)}</span>
                         </div>
                         <h4>${post.title}</h4>
-                        ${post.image ? `<img src="${post.image}" style="max-width:250px; border-radius:8px; margin:8px 0;">` : ''}
+                        ${post.image ? `<img src="${post.image}" style="max-width:250px; border-radius:12px; margin:8px 0;">` : ''}
                         <p>${post.description || ''}</p>
                         <p><b>Location:</b> ${post.location || 'N/A'}</p>
                         <div class="feed-meta">Posted by ${post.posted_by_name}</div>

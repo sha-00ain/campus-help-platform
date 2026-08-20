@@ -15,6 +15,11 @@ exports.register = async (req, res) => {
             return res.status(400).json({ message: 'Name, email and password are required.' });
         }
 
+        // Only allow official Hamdard University emails
+        if (!email.toLowerCase().endsWith('@hamdarduniversity.edu.bd')) {
+            return res.status(400).json({ message: 'Only @hamdarduniversity.edu.bd email addresses are allowed to register.' });
+        }
+
         // check if email already used
         const [existing] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
         if (existing.length > 0) {
@@ -44,6 +49,11 @@ exports.login = async (req, res) => {
 
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required.' });
+        }
+
+        // Only allow official Hamdard University emails
+        if (!email.toLowerCase().endsWith('@hamdarduniversity.edu.bd')) {
+            return res.status(400).json({ message: 'Only @hamdarduniversity.edu.bd email addresses are allowed to login.' });
         }
 
         const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);

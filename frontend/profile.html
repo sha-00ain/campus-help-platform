@@ -1,70 +1,919 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>My Profile - Campus Help Platform</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Profile · Campus Help Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ===== GLOBAL RESET & VARIABLES ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f7f9fc;
+      --card-bg: #ffffff;
+      --primary: #1e5eff;
+      --primary-dark: #1749d0;
+      --primary-soft: #e9efff;
+      --text-dark: #0b1b33;
+      --text-muted: #4a5b6e;
+      --border: #e2e8f0;
+      --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.03);
+      --shadow-md: 0 16px 32px rgba(0, 0, 0, 0.07);
+      --radius: 22px;
+      --topbar-height: 76px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-top: var(--topbar-height);
+    }
+
+    /* ===== SMART SCROLL TOPBAR ===== */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      box-shadow: var(--shadow-sm);
+      z-index: 1000;
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+      height: var(--topbar-height);
+    }
+
+    .topbar.header-hidden {
+      transform: translateY(-100%);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon {
+      background: var(--primary);
+      color: white;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 6px 14px rgba(30, 95, 255, 0.25);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      padding: 0.5rem 0.8rem;
+      border-radius: 30px;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-links a:hover {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .nav-links a.active-link {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 6px 12px rgba(30, 95, 255, 0.25);
+    }
+
+    .nav-links .logout-btn {
+      background: transparent;
+      border: 1.5px solid #fee2e2;
+      color: #dc2626;
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nav-links .logout-btn:hover {
+      background: #fee2e2;
+      border-color: #dc2626;
+    }
+
+    /* ===== CONTAINER ===== */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ===== PROFILE HEADER CARD ===== */
+    .profile-header {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 2rem 2rem 1.5rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, #1e5eff, #6c8cff, #1e5eff);
+    }
+
+    .profile-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .profile-details h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.3rem;
+      color: var(--text-dark);
+    }
+
+    .profile-details .username {
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .edit-btn {
+      margin-left: auto;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .edit-btn:hover {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 6px 14px rgba(30, 95, 255, 0.25);
+    }
+
+    /* ===== PROFILE DETAILS SECTION ===== */
+    .details-section {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    .details-section h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .detail-item {
+      padding: 1rem 1.2rem;
+      background: #fafcff;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .detail-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .detail-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      min-height: 24px;
+    }
+
+    .detail-value.empty {
+      color: #b0b8c4;
+      font-weight: 400;
+      font-style: italic;
+    }
+
+    /* ===== EDIT MODE ===== */
+    .edit-form {
+      display: none;
+    }
+
+    .edit-form.active {
+      display: block;
+    }
+
+    .details-view.hidden {
+      display: none;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+      color: var(--text-dark);
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.8rem 1.2rem;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.95rem;
+      background: #fafcff;
+      transition: 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(30, 95, 255, 0.1);
+    }
+
+    .form-group input[readonly] {
+      background: #f0f0f0;
+      cursor: not-allowed;
+      color: var(--text-muted);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .btn-save {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 8px 16px rgba(30, 95, 255, 0.25);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-save:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 12px 24px rgba(30, 95, 255, 0.35);
+    }
+
+    .btn-cancel {
+      background: #f0f0f0;
+      color: var(--text-dark);
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-left: 0.5rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-cancel:hover {
+      background: #e0e0e0;
+    }
+
+    /* ===== USER POSTS SECTION ===== */
+    .posts-section {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border);
+    }
+
+    .posts-section h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .post-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1.2rem 0;
+      border-bottom: 1px solid var(--border);
+      transition: 0.2s;
+    }
+
+    .post-item:last-child {
+      border-bottom: none;
+    }
+
+    .post-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .post-content {
+      flex: 1;
+    }
+
+    .post-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .post-meta {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .post-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .no-posts {
+      text-align: center;
+      padding: 2rem;
+      color: #b0b8c4;
+      font-size: 1rem;
+      font-style: italic;
+    }
+
+    .no-posts i {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--border);
+    }
+
+    /* ===== SCROLL TO TOP BUTTON ===== */
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 52px;
+      height: 52px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(30, 95, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      transition: all 0.3s;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 999;
+    }
+
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #scrollTopBtn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 32px rgba(30, 95, 255, 0.45);
+    }
+
+    /* ===== SCROLL HINT ===== */
+    .scroll-hint {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 2rem;
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    .scroll-hint i {
+      display: block;
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.8rem 1rem;
+        height: auto;
+        min-height: var(--topbar-height);
+      }
+      body {
+        padding-top: 90px;
+      }
+      :root {
+        --topbar-height: 90px;
+      }
+      .profile-info {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+      }
+      .edit-btn {
+        margin-left: 0;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .container {
+        padding: 1rem 0.8rem 3rem;
+      }
+      .profile-header,
+      .details-section,
+      .posts-section {
+        padding: 1.2rem 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<nav>
-    <div class="nav-left">
-        <a class="back-arrow" onclick="goBack()">←</a>
-        <a class="logo" href="home.html">🎓 Campus Help Platform</a>
+  <!-- Smart Topbar -->
+  <header class="topbar" id="smartHeader">
+    <div class="logo-area">
+      <span class="logo-icon"><i class="fas fa-graduation-cap"></i></span>
+      <span>Campus<span style="color: var(--primary);">Help</span></span>
     </div>
-    <div>
-        <a class="navlink" href="#" onclick="logout()">Logout</a>
-    </div>
-</nav>
+    <nav class="nav-links">
+      <a href="home.html"><i class="fas fa-home"></i> Home</a>
+      <a href="#" class="active-link"><i class="fas fa-user"></i> Profile</a>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </nav>
+  </header>
 
-<div class="container">
+  <div class="container">
 
-    <div class="card">
-        <div class="profile-header">
-            <div class="profile-avatar" id="avatarInitial">?</div>
-            <div>
-                <h2 id="profileName">Loading...</h2>
-                <p id="profileEmail" style="color:#777; font-size:14px;"></p>
-            </div>
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <div class="profile-info">
+        <div class="profile-avatar" id="profileAvatar">👤</div>
+        <div class="profile-details">
+          <h1 id="profileName">No Name</h1>
+          <div class="username" id="profileUsername">@username</div>
         </div>
+        <button class="edit-btn" id="editBtn" onclick="toggleEditMode()">
+          <i class="fas fa-pen"></i> Edit Profile
+        </button>
+      </div>
     </div>
 
-    <div class="card">
-        <h2>Edit Profile</h2>
-        <div id="msgBox"></div>
+    <!-- Profile Details Section -->
+    <div class="details-section">
+      <h2><i class="fas fa-user-circle" style="color: var(--primary);"></i> Profile Details</h2>
 
-        <form id="profileForm">
-            <label>Full Name</label>
-            <input type="text" id="name" required>
+      <!-- View Mode -->
+      <div class="details-view" id="detailsView">
+        <div class="details-grid">
+          <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-user"></i> Full Name</div>
+            <div class="detail-value empty" id="viewName">Not set</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-envelope"></i> Email</div>
+            <div class="detail-value empty" id="viewEmail">Not set</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-id-card"></i> Student/Staff ID</div>
+            <div class="detail-value empty" id="viewId">Not set</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-phone"></i> Phone</div>
+            <div class="detail-value empty" id="viewPhone">Not set</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-tint"></i> Blood Group</div>
+            <div class="detail-value empty" id="viewBlood">Not set</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-building"></i> Department</div>
+            <div class="detail-value empty" id="viewDept">Not set</div>
+          </div>
+        </div>
+      </div>
 
-            <label>Email (cannot be changed)</label>
-            <input type="email" id="email" disabled>
-
-            <label>Student/Staff ID</label>
-            <input type="text" id="student_id">
-
-            <label>Phone</label>
-            <input type="text" id="phone">
-
-            <label>Blood Group</label>
-            <select id="blood_group">
-                <option value="">-- Select --</option>
-                <option>A+</option><option>A-</option>
-                <option>B+</option><option>B-</option>
-                <option>O+</option><option>O-</option>
-                <option>AB+</option><option>AB-</option>
+      <!-- Edit Mode -->
+      <div class="edit-form" id="editForm">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Full Name</label>
+          <input type="text" id="editFullName" placeholder="Enter your full name" value="">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> Email (cannot be changed)</label>
+          <input type="email" id="editEmail" placeholder="your.email@hamdarduniversity.edu.bd" value="" readonly>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-id-card"></i> Student/Staff ID</label>
+            <input type="text" id="editId" placeholder="Enter your ID" value="">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> Phone</label>
+            <input type="tel" id="editPhone" placeholder="Enter phone number" value="">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-tint"></i> Blood Group</label>
+            <select id="editBlood">
+              <option value="" disabled selected>Select blood group</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
             </select>
-
-            <label>Department</label>
-            <input type="text" id="department">
-
-            <button type="submit">Save Changes</button>
-        </form>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-building"></i> Department</label>
+            <input type="text" id="editDept" placeholder="Enter department" value="">
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap;">
+          <button class="btn-save" onclick="saveChanges()"><i class="fas fa-check"></i> Save Changes</button>
+          <button class="btn-cancel" onclick="cancelEdit()"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+      </div>
     </div>
 
-</div>
+    <!-- User Posts Section -->
+    <div class="posts-section">
+      <h2><i class="fas fa-file-alt" style="color: var(--primary);"></i> My Posts</h2>
+      <div id="userPosts">
+        <div class="no-posts">
+          <i class="fas fa-inbox"></i>
+          No posts yet
+        </div>
+      </div>
+    </div>
 
-<script src="js/api.js"></script>
-<script src="js/profile.js"></script>
+    <!-- Scroll hint -->
+    <div class="scroll-hint">
+      <i class="fas fa-arrow-down"></i>
+      Scroll down to hide the topbar<br>
+      <span style="font-size: 0.8rem; opacity: 0.7;">Scroll up to show it again</span>
+    </div>
+
+  </div>
+
+  <!-- Scroll to top button -->
+  <button id="scrollTopBtn" aria-label="Scroll to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script src="js/api.js"></script>
+  <script>
+    requireLogin();
+
+    // ===== SMART SCROLL TOPBAR =====
+    (function() {
+      const header = document.getElementById('smartHeader');
+      if (!header) return;
+
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+
+      function updateHeader() {
+        const currentScrollY = window.scrollY;
+        const headerHeight = header.offsetHeight;
+
+        if (currentScrollY < lastScrollY || currentScrollY < 10) {
+          header.classList.remove('header-hidden');
+        } else if (currentScrollY > lastScrollY && currentScrollY > headerHeight) {
+          header.classList.add('header-hidden');
+        }
+
+        lastScrollY = currentScrollY;
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          window.requestAnimationFrame(updateHeader);
+          ticking = true;
+        }
+      });
+
+      window.addEventListener('load', function() {
+        updateHeader();
+      });
+
+      updateHeader();
+    })();
+
+    // ===== SCROLL TO TOP BUTTON =====
+    (function() {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (!scrollBtn) return;
+
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 400) {
+          scrollBtn.classList.add('visible');
+        } else {
+          scrollBtn.classList.remove('visible');
+        }
+      });
+
+      scrollBtn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    })();
+
+    // ===== LOAD REAL PROFILE DATA =====
+    let currentProfile = null;
+
+    async function loadProfile() {
+      try {
+        const profile = await apiCall('/auth/profile', 'GET');
+        currentProfile = profile;
+
+        document.getElementById('profileName').textContent = profile.name;
+        document.getElementById('profileUsername').textContent = profile.email;
+        document.getElementById('profileAvatar').textContent = profile.name.charAt(0).toUpperCase();
+
+        setView('viewName', profile.name);
+        setView('viewEmail', profile.email);
+        setView('viewId', profile.student_id);
+        setView('viewPhone', profile.phone);
+        setView('viewBlood', profile.blood_group);
+        setView('viewDept', profile.department);
+
+        loadMyPosts(profile.user_id, profile.name);
+      } catch (err) {
+        alert('Could not load your profile: ' + err.message);
+      }
+    }
+
+    function setView(id, value) {
+      const el = document.getElementById(id);
+      if (value) {
+        el.textContent = value;
+        el.classList.remove('empty');
+      } else {
+        el.textContent = 'Not set';
+        el.classList.add('empty');
+      }
+    }
+
+    // ===== LOAD "MY POSTS" (blood requests + items posted by this user) =====
+    async function loadMyPosts(userId, userName) {
+      const container = document.getElementById('userPosts');
+      try {
+        const [bloodRequests, items] = await Promise.all([
+          apiCall('/blood/requests', 'GET'),
+          apiCall('/items', 'GET')
+        ]);
+
+        const myBlood = bloodRequests.filter(r => r.requester_id === userId)
+          .map(r => ({ ...r, post_kind: 'blood' }));
+        const myItems = items.filter(i => i.posted_by === userId)
+          .map(i => ({ ...i, post_kind: 'item' }));
+
+        const myPosts = [...myBlood, ...myItems].sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+
+        if (myPosts.length === 0) {
+          container.innerHTML = `
+            <div class="no-posts">
+              <i class="fas fa-inbox"></i>
+              No posts yet
+            </div>`;
+          return;
+        }
+
+        const initial = userName.charAt(0).toUpperCase();
+        container.innerHTML = myPosts.map(p => {
+          if (p.post_kind === 'blood') {
+            return `
+              <div class="post-item">
+                <div class="post-avatar">${initial}</div>
+                <div class="post-content">
+                  <div class="post-title">🩸 Blood request: ${p.blood_group_needed} needed</div>
+                  <div class="post-meta">
+                    <span class="post-tag">${p.urgency_level}</span>
+                    <span>${p.hospital_location}</span>
+                  </div>
+                </div>
+              </div>`;
+          } else {
+            return `
+              <div class="post-item">
+                <div class="post-avatar">${initial}</div>
+                <div class="post-content">
+                  <div class="post-title">${p.item_type === 'found' ? '✅ Found' : '🎒 Lost'}: ${p.title}</div>
+                  <div class="post-meta">
+                    <span class="post-tag">${p.category || 'General'}</span>
+                    <span>${p.location || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>`;
+          }
+        }).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="no-posts">Could not load your posts.</div>`;
+      }
+    }
+
+    // ===== EDIT PROFILE MODE =====
+    function toggleEditMode() {
+      document.getElementById('editFullName').value = currentProfile.name || '';
+      document.getElementById('editEmail').value = currentProfile.email || '';
+      document.getElementById('editId').value = currentProfile.student_id || '';
+      document.getElementById('editPhone').value = currentProfile.phone || '';
+      document.getElementById('editDept').value = currentProfile.department || '';
+      if (currentProfile.blood_group) {
+        document.getElementById('editBlood').value = currentProfile.blood_group;
+      }
+
+      document.getElementById('detailsView').classList.add('hidden');
+      document.getElementById('editForm').classList.add('active');
+      document.getElementById('editBtn').style.display = 'none';
+    }
+
+    function cancelEdit() {
+      document.getElementById('detailsView').classList.remove('hidden');
+      document.getElementById('editForm').classList.remove('active');
+      document.getElementById('editBtn').style.display = 'flex';
+    }
+
+    async function saveChanges() {
+      const fullName = document.getElementById('editFullName').value.trim();
+      const studentId = document.getElementById('editId').value.trim();
+      const phone = document.getElementById('editPhone').value.trim();
+      const bloodGroup = document.getElementById('editBlood').value;
+      const dept = document.getElementById('editDept').value.trim();
+
+      if (!fullName) {
+        alert('Full name is required.');
+        return;
+      }
+
+      try {
+        await apiCall('/auth/profile', 'PUT', {
+          name: fullName,
+          student_id: studentId,
+          phone: phone,
+          blood_group: bloodGroup,
+          department: dept
+        });
+
+        // Update the locally saved user info too (used for the welcome message on Home)
+        const localUser = getUser();
+        localUser.name = fullName;
+        localUser.blood_group = bloodGroup;
+        localStorage.setItem('user', JSON.stringify(localUser));
+
+        await loadProfile();
+
+        document.getElementById('detailsView').classList.remove('hidden');
+        document.getElementById('editForm').classList.remove('active');
+        document.getElementById('editBtn').style.display = 'flex';
+
+        alert('✅ Profile updated successfully!');
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    loadProfile();
+  </script>
+
 </body>
 </html>
