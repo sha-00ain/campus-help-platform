@@ -36,7 +36,7 @@
             <h4>Lost & Found</h4>
             <p style="font-size:13px;">Browse or post items</p>
         </a>
-        <div class="future-box">
+        <div class="future-box" onclick="openFutureModal()" style="cursor:pointer;">
             <div class="icon">✨</div>
             <h4>More features</h4>
             <p>coming soon</p>
@@ -49,6 +49,66 @@
         <div id="feedList">Loading feed...</div>
     </div>
 
+</div>
+
+<!-- Future Scope Modal -->
+<div id="futureModalOverlay" class="modal-overlay" onclick="closeFutureModalOnOverlay(event)">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>✨ Future Scope</h2>
+            <span class="modal-close" onclick="closeFutureModal()">&times;</span>
+        </div>
+        <p style="color:#777; margin-bottom:16px; font-size:14px;">Here's what we're planning to add next:</p>
+
+        <div class="future-item">
+            <div class="number">1</div>
+            <div>
+                <h4>🚨 Emergency / SOS Alert</h4>
+                <p>Send a quick alert to nearby users during a campus emergency, accident, or health issue.</p>
+            </div>
+        </div>
+
+        <div class="future-item">
+            <div class="number">2</div>
+            <div>
+                <h4>🛒 Campus Marketplace</h4>
+                <p>Buy and sell second-hand books, calculators, laptops, and other items within campus.</p>
+            </div>
+        </div>
+
+        <div class="future-item">
+            <div class="number">3</div>
+            <div>
+                <h4>📅 Event & Volunteer Management</h4>
+                <p>Organize blood donation camps, Lost & Found drives, and other community service events.</p>
+            </div>
+        </div>
+
+        <div class="future-item">
+            <div class="number">4</div>
+            <div>
+                <h4>💬 Community Feed / Forum</h4>
+                <p>A general discussion board for announcements and campus-wide conversations.</p>
+            </div>
+        </div>
+
+        <div class="future-item">
+            <div class="number">5</div>
+            <div>
+                <h4>⭐ Rating & Trust System</h4>
+                <p>Reliability ratings for donors and honest-finder badges for Lost & Found users.</p>
+            </div>
+        </div>
+
+        <div class="future-item">
+            <div class="number">6</div>
+            <div>
+                <h4>🗺️ Map Integration</h4>
+                <p>Visualize blood requests and lost/found items on a live campus map.</p>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <script src="js/api.js"></script>

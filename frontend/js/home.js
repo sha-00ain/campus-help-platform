@@ -3,6 +3,20 @@ requireLogin();
 const user = getUser();
 document.getElementById('welcomeMsg').innerText = `Welcome, ${user.name}!`;
 
+// Future Scope modal controls
+function openFutureModal() {
+    document.getElementById('futureModalOverlay').classList.add('active');
+}
+function closeFutureModal() {
+    document.getElementById('futureModalOverlay').classList.remove('active');
+}
+function closeFutureModalOnOverlay(event) {
+    // only close if the click was on the dark overlay itself, not inside the box
+    if (event.target.id === 'futureModalOverlay') {
+        closeFutureModal();
+    }
+}
+
 // Turn a MySQL datetime into a friendly "time ago" string
 function timeAgo(dateStr) {
     const then = new Date(dateStr.replace(' ', 'T'));

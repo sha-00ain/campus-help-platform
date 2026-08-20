@@ -78,7 +78,63 @@ nav a.navlink:hover { text-decoration: underline; }
 .future-box h4 { color: #777; margin-bottom: 4px; font-size: 14px; }
 .future-box p { font-size: 12px; }
 
-/* Profile page */
+/* Future Scope Modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    max-width: 550px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.modal-header h2 { color: #b3001b; margin: 0; }
+.modal-close {
+    font-size: 26px;
+    cursor: pointer;
+    color: #888;
+    line-height: 1;
+}
+.modal-close:hover { color: #222; }
+
+.future-item {
+    display: flex;
+    gap: 14px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+}
+.future-item .number {
+    min-width: 30px; height: 30px;
+    background: #b3001b;
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 13px;
+    flex-shrink: 0;
+}
+.future-item h4 { color: #b3001b; margin-bottom: 3px; font-size: 15px; }
+.future-item p { font-size: 13px; color: #555; margin: 0; }
 .profile-header {
     display: flex;
     align-items: center;
