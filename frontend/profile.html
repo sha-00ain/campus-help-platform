@@ -474,6 +474,17 @@
       color: var(--border);
     }
 
+    /* Pagination (My Posts) */
+    .pagination { display: flex; justify-content: center; gap: 0.4rem; margin-top: 1rem; flex-wrap: wrap; }
+    .page-btn {
+      min-width: 36px; height: 36px; padding: 0 0.5rem;
+      border: 1.5px solid var(--border); background: white; color: var(--text-dark);
+      border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .page-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
     /* ===== SCROLL TO TOP BUTTON ===== */
     #scrollTopBtn {
       position: fixed;
@@ -789,6 +800,7 @@
           No posts yet
         </div>
       </div>
+      <div id="userPostsPagination"></div>
     </div>
 
   </div>
@@ -915,6 +927,8 @@
 
     // ===== LOAD "MY POSTS" (blood requests + items posted by this user) =====
     let myPosts = [];
+    const MY_POSTS_PAGE_SIZE = 5;
+    let currentMyPostsPage = 1;
 
     async function loadMyPosts(userId, userName) {
       const container = document.getElementById('userPosts');
@@ -933,46 +947,61 @@
           (a, b) => new Date(b.created_at) - new Date(a.created_at)
         );
 
-        if (myPosts.length === 0) {
-          container.innerHTML = `
-            <div class="no-posts">
-              <i class="fas fa-inbox"></i>
-              No posts yet
-            </div>`;
-          return;
-        }
-
-        const initial = userName.charAt(0).toUpperCase();
-        container.innerHTML = myPosts.map((p, idx) => {
-          if (p.post_kind === 'blood') {
-            return `
-              <div class="post-item" onclick="openPostDetail(${idx})">
-                <div class="post-avatar">${initial}</div>
-                <div class="post-content">
-                  <div class="post-title">🩸 Blood request: ${p.blood_group_needed} needed</div>
-                  <div class="post-meta">
-                    <span class="post-tag">${p.urgency_level}</span>
-                    <span>${p.hospital_location}</span>
-                  </div>
-                </div>
-              </div>`;
-          } else {
-            return `
-              <div class="post-item" onclick="openPostDetail(${idx})">
-                <div class="post-avatar">${initial}</div>
-                <div class="post-content">
-                  <div class="post-title">${p.item_type === 'found' ? '✅ Found' : '🎒 Lost'}: ${p.title}</div>
-                  <div class="post-meta">
-                    <span class="post-tag">${p.category || 'General'}</span>
-                    <span>${p.location || 'N/A'}</span>
-                  </div>
-                </div>
-              </div>`;
-          }
-        }).join('');
+        currentMyPostsPage = 1;
+        renderMyPostsPage(1);
       } catch (err) {
         container.innerHTML = `<div class="no-posts">Could not load your posts.</div>`;
       }
+    }
+
+    function renderMyPostsPage(page) {
+      currentMyPostsPage = page;
+      const container = document.getElementById('userPosts');
+
+      if (myPosts.length === 0) {
+        container.innerHTML = `
+          <div class="no-posts">
+            <i class="fas fa-inbox"></i>
+            No posts yet
+          </div>`;
+        renderPagination('userPostsPagination', 0, MY_POSTS_PAGE_SIZE, 1, 'renderMyPostsPage');
+        return;
+      }
+
+      const startIdx = (page - 1) * MY_POSTS_PAGE_SIZE;
+      const pagePosts = myPosts.slice(startIdx, startIdx + MY_POSTS_PAGE_SIZE);
+
+      container.innerHTML = pagePosts.map((p, i) => {
+        const idx = startIdx + i;
+        const serial = idx + 1;
+        if (p.post_kind === 'blood') {
+          return `
+            <div class="post-item" onclick="openPostDetail(${idx})">
+              <div class="post-avatar">${serial}</div>
+              <div class="post-content">
+                <div class="post-title">${serial}. 🩸 Blood request: ${p.blood_group_needed} needed</div>
+                <div class="post-meta">
+                  <span class="post-tag">${p.urgency_level}</span>
+                  <span>${p.hospital_location}</span>
+                </div>
+              </div>
+            </div>`;
+        } else {
+          return `
+            <div class="post-item" onclick="openPostDetail(${idx})">
+              <div class="post-avatar">${serial}</div>
+              <div class="post-content">
+                <div class="post-title">${serial}. ${p.item_type === 'found' ? '✅ Found' : '🎒 Lost'}: ${p.title}</div>
+                <div class="post-meta">
+                  <span class="post-tag">${p.category || 'General'}</span>
+                  <span>${p.location || 'N/A'}</span>
+                </div>
+              </div>
+            </div>`;
+        }
+      }).join('');
+
+      renderPagination('userPostsPagination', myPosts.length, MY_POSTS_PAGE_SIZE, page, 'renderMyPostsPage');
     }
 
     // ===== POST DETAIL / EDIT MODAL =====
