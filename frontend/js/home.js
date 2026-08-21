@@ -118,12 +118,21 @@ function renderFeedPage(page) {
 
 // ===== Post Detail Modal (view details + comments + interact) =====
 let currentDetailPost = null;
+let currentDetailIdx = null;
 
 function openPostDetail(globalIdx) {
     const post = allFeedPosts[globalIdx];
     if (!post) return;
     currentDetailPost = post;
+    currentDetailIdx = globalIdx;
+    renderPostDetailView();
+    document.getElementById('postDetailModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    loadDetailComments();
+}
 
+function renderPostDetailView() {
+    const post = currentDetailPost;
     const contentEl = document.getElementById('detailContent');
     const titleEl = document.getElementById('detailTitle');
 
@@ -137,7 +146,11 @@ function openPostDetail(globalIdx) {
             <p style="margin:4px 0;"><b>Location:</b> ${post.hospital_location}</p>
             <p style="margin:4px 0;"><b>Units needed:</b> ${post.units_needed}</p>
             <p style="margin:4px 0; color:var(--text-muted); font-size:0.85rem;">Posted by ${post.requester_name}</p>
-            ${!isOwner ? `<button onclick="respondFromModal(${post.request_id})"><i class="fas fa-hand-holding-heart"></i> I Can Donate</button>` : ''}
+            <div class="post-detail-actions">
+                ${!isOwner ? `<button class="btn-primary-action" onclick="respondFromModal(${post.request_id})"><i class="fas fa-hand-holding-heart"></i> I Can Donate</button>` : ''}
+                ${isOwner ? `<button class="btn-save" onclick="enterFeedEditMode()"><i class="fas fa-pen"></i> Edit</button>
+                             <button class="btn-danger" onclick="deleteFeedPost()"><i class="fas fa-trash"></i> Delete</button>` : ''}
+            </div>
         `;
     } else {
         titleEl.innerText = `${post.item_type === 'found' ? '✅ Found' : '🎒 Lost'}: ${post.title}`;
@@ -148,19 +161,172 @@ function openPostDetail(globalIdx) {
             <p style="margin:4px 0;">${post.description || ''}</p>
             <p style="margin:4px 0;"><b>Category:</b> ${post.category || 'N/A'} | <b>Location:</b> ${post.location || 'N/A'}</p>
             <p style="margin:4px 0; color:var(--text-muted); font-size:0.85rem;">Posted by ${post.posted_by_name}</p>
-            ${!isOwner ? `<button onclick="claimFromModal(${post.item_id})"><i class="fas fa-hand-paper"></i> This is Mine / Claim</button>` : ''}
+            <div class="post-detail-actions">
+                ${!isOwner ? `<button class="btn-primary-action" onclick="claimFromModal(${post.item_id})"><i class="fas fa-hand-paper"></i> This is Mine / Claim</button>` : ''}
+                ${isOwner ? `<button class="btn-save" onclick="enterFeedEditMode()"><i class="fas fa-pen"></i> Edit</button>
+                             <button class="btn-danger" onclick="deleteFeedPost()"><i class="fas fa-trash"></i> Delete</button>` : ''}
+            </div>
         `;
     }
+}
 
-    document.getElementById('postDetailModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    loadDetailComments();
+function enterFeedEditMode() {
+    const post = currentDetailPost;
+    const contentEl = document.getElementById('detailContent');
+
+    if (post.feed_type === 'blood') {
+        contentEl.innerHTML = `
+            <div class="form-group">
+                <label>Blood Group Needed</label>
+                <select id="feedEditBloodGroup">
+                    ${['A+','A-','B+','B-','O+','O-','AB+','AB-'].map(bg =>
+                        `<option value="${bg}" ${post.blood_group_needed === bg ? 'selected' : ''}>${bg}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Patient Name</label>
+                <input type="text" id="feedEditPatientName" value="${post.patient_name || ''}">
+            </div>
+            <div class="form-group">
+                <label>Hospital / Location</label>
+                <input type="text" id="feedEditLocation" value="${post.hospital_location || ''}">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Units Needed</label>
+                    <input type="number" id="feedEditUnits" min="1" value="${post.units_needed || 1}">
+                </div>
+                <div class="form-group">
+                    <label>Urgency</label>
+                    <select id="feedEditUrgency">
+                        ${['normal','urgent','critical'].map(u =>
+                            `<option value="${u}" ${post.urgency_level === u ? 'selected' : ''}>${u}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Image (optional, leave blank to keep current)</label>
+                <input type="file" id="feedEditImage" accept="image/*">
+            </div>
+            <div class="post-detail-actions">
+                <button class="btn-save" onclick="saveFeedEdit()"><i class="fas fa-check"></i> Save Changes</button>
+                <button class="btn-cancel" onclick="renderPostDetailView()"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+        `;
+    } else {
+        contentEl.innerHTML = `
+            <div class="form-group">
+                <label>Type</label>
+                <select id="feedEditItemType">
+                    <option value="lost" ${post.item_type === 'lost' ? 'selected' : ''}>Lost</option>
+                    <option value="found" ${post.item_type === 'found' ? 'selected' : ''}>Found</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" id="feedEditTitle" value="${post.title || ''}">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <input type="text" id="feedEditCategory" value="${post.category || ''}">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" id="feedEditDescription" value="${post.description || ''}">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="feedEditLocation" value="${post.location || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="feedEditDate" value="${post.date_occurred ? post.date_occurred.substring(0,10) : ''}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Image (optional, leave blank to keep current)</label>
+                <input type="file" id="feedEditImage" accept="image/*">
+            </div>
+            <div class="post-detail-actions">
+                <button class="btn-save" onclick="saveFeedEdit()"><i class="fas fa-check"></i> Save Changes</button>
+                <button class="btn-cancel" onclick="renderPostDetailView()"><i class="fas fa-times"></i> Cancel</button>
+            </div>
+        `;
+    }
+}
+
+async function saveFeedEdit() {
+    const post = currentDetailPost;
+    try {
+        const newImage = await fileToBase64(document.getElementById('feedEditImage'));
+
+        if (post.feed_type === 'blood') {
+            const body = {
+                blood_group_needed: document.getElementById('feedEditBloodGroup').value,
+                patient_name: document.getElementById('feedEditPatientName').value.trim(),
+                hospital_location: document.getElementById('feedEditLocation').value.trim(),
+                units_needed: document.getElementById('feedEditUnits').value,
+                urgency_level: document.getElementById('feedEditUrgency').value
+            };
+            if (newImage) body.image = newImage;
+
+            if (!body.hospital_location) {
+                alert('Hospital/location is required.');
+                return;
+            }
+
+            await apiCall(`/blood/requests/${post.request_id}`, 'PUT', body);
+        } else {
+            const body = {
+                item_type: document.getElementById('feedEditItemType').value,
+                category: document.getElementById('feedEditCategory').value.trim(),
+                title: document.getElementById('feedEditTitle').value.trim(),
+                description: document.getElementById('feedEditDescription').value.trim(),
+                location: document.getElementById('feedEditLocation').value.trim(),
+                date_occurred: document.getElementById('feedEditDate').value || null
+            };
+            if (newImage) body.image = newImage;
+
+            if (!body.title) {
+                alert('Title is required.');
+                return;
+            }
+
+            await apiCall(`/items/${post.item_id}`, 'PUT', body);
+        }
+
+        closeDetailModal();
+        await loadFeed();
+        alert('✅ Post updated successfully!');
+    } catch (err) {
+        alert('Error updating post: ' + err.message);
+    }
+}
+
+async function deleteFeedPost() {
+    const post = currentDetailPost;
+    if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+    try {
+        if (post.feed_type === 'blood') {
+            await apiCall(`/blood/requests/${post.request_id}`, 'DELETE');
+        } else {
+            await apiCall(`/items/${post.item_id}`, 'DELETE');
+        }
+        closeDetailModal();
+        await loadFeed();
+    } catch (err) {
+        alert('Error deleting post: ' + err.message);
+    }
 }
 
 function closeDetailModal() {
     document.getElementById('postDetailModal').classList.remove('active');
     document.body.style.overflow = '';
     currentDetailPost = null;
+    currentDetailIdx = null;
 }
 
 function closeDetailModalOnOverlay(event) {

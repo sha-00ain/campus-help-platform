@@ -316,6 +316,32 @@
     .urgency-tag.urgent { background: #fff3cd; color: #b45309; }
     .urgency-tag.critical { background: #fdeaea; color: #d32f2f; }
 
+    /* Post detail action buttons + inline edit form (used inside the detail modal) */
+    .post-detail-actions { display: flex; gap: 0.6rem; margin-top: 1rem; flex-wrap: wrap; }
+    .btn-primary-action, .btn-save, .btn-cancel, .btn-danger {
+      border: none; border-radius: 30px; font-weight: 700; font-size: 0.85rem;
+      padding: 0.7rem 1.4rem; cursor: pointer; font-family: 'Inter', sans-serif;
+      display: inline-flex; align-items: center; gap: 0.4rem; transition: 0.2s;
+    }
+    .btn-primary-action { background: var(--primary); color: white; }
+    .btn-primary-action:hover { background: var(--primary-dark); }
+    .btn-save { background: var(--primary); color: white; }
+    .btn-save:hover { background: var(--primary-dark); }
+    .btn-cancel { background: #f0f0f0; color: var(--text-dark); }
+    .btn-cancel:hover { background: #e0e0e0; }
+    .btn-danger { background: #fee2e2; color: #dc2626; }
+    .btn-danger:hover { background: #dc2626; color: white; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-weight: 600; font-size: 0.82rem; margin-bottom: 0.3rem; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 0.7rem 1rem; border: 1.5px solid var(--border); border-radius: 12px;
+      font-size: 0.9rem; background: #fafcff; font-family: 'Inter', sans-serif;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none; border-color: var(--primary); background: white;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
     /* Comments */
     .comment-item {
       display: flex; gap: 0.7rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border);
@@ -505,6 +531,9 @@
       }
       .modal-box {
         padding: 1.5rem;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
       }
       .nav-links a {
         font-size: 0.85rem;
