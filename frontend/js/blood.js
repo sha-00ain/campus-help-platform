@@ -209,13 +209,4 @@ async function becomeDonor() {
 }
 
 // Load requests on page load
-// If we arrived here via a "?edit=<id>" link (e.g. from the home feed / latest activity),
-// automatically open that request in edit mode once the list has loaded.
-loadRequests().then(() => {
-    const params = new URLSearchParams(window.location.search);
-    const editId = params.get('edit');
-    if (editId) {
-        editRequest(parseInt(editId));
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
-});
+loadRequests();
