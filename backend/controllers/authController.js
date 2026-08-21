@@ -20,6 +20,10 @@ exports.register = async (req, res) => {
             return res.status(400).json({ message: 'Only @hamdarduniversity.edu.bd email addresses are allowed to register.' });
         }
 
+        if (password.length < 4) {
+            return res.status(400).json({ message: 'Password must be at least 4 characters long.' });
+        }
+
         // check if email already used
         const [existing] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
         if (existing.length > 0) {
@@ -62,6 +66,11 @@ exports.login = async (req, res) => {
         }
 
         const user = users[0];
+
+        if (!user.is_active) {
+            return res.status(403).json({ message: 'Your account has been blocked by the admin. Please contact support.' });
+        }
+
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid email or password.' });
@@ -96,7 +105,7 @@ exports.getProfile = async (req, res) => {
     try {
         const user_id = req.user.user_id;
         const [users] = await db.query(
-            `SELECT user_id, name, email, student_id, phone, blood_group, department, role, created_at
+            `SELECT user_id, name, email, student_id, phone, blood_group, department, role, profile_picture, created_at
              FROM users WHERE user_id = ?`,
             [user_id]
         );
@@ -114,17 +123,27 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
     try {
         const user_id = req.user.user_id;
-        const { name, phone, blood_group, department, student_id } = req.body;
+        const { name, phone, blood_group, department, student_id, profile_picture } = req.body;
 
         if (!name) {
             return res.status(400).json({ message: 'Name is required.' });
         }
 
-        await db.query(
-            `UPDATE users SET name = ?, phone = ?, blood_group = ?, department = ?, student_id = ?
-             WHERE user_id = ?`,
-            [name, phone, blood_group, department, student_id, user_id]
-        );
+        if (profile_picture !== undefined && profile_picture !== null) {
+            // a new picture was sent - update it too
+            await db.query(
+                `UPDATE users SET name = ?, phone = ?, blood_group = ?, department = ?, student_id = ?, profile_picture = ?
+                 WHERE user_id = ?`,
+                [name, phone, blood_group, department, student_id, profile_picture, user_id]
+            );
+        } else {
+            // no new picture - keep the existing one untouched
+            await db.query(
+                `UPDATE users SET name = ?, phone = ?, blood_group = ?, department = ?, student_id = ?
+                 WHERE user_id = ?`,
+                [name, phone, blood_group, department, student_id, user_id]
+            );
+        }
 
         res.json({ message: 'Profile updated successfully!' });
     } catch (err) {

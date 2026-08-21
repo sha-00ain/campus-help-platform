@@ -81,7 +81,8 @@ See [SETUP.md](./SETUP.md) for full step-by-step local setup instructions.
 ---
 
 ## 👥 Team
-- Md Shakil Hossain— [Student ID: 315222031]
+- [Your Name] — [Student ID]
+- [Add teammates if any]
 
 ## 📄 License
 Academic project for CSE421 — Software Engineering course.

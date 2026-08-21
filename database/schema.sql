@@ -17,6 +17,7 @@ CREATE TABLE users (
     blood_group VARCHAR(5),
     department VARCHAR(50),
     role ENUM('student','staff','admin') DEFAULT 'student',
+    profile_picture LONGTEXT,
     is_active BOOLEAN DEFAULT TRUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -42,6 +43,7 @@ CREATE TABLE blood_requests (
     units_needed INT DEFAULT 1,
     urgency_level ENUM('normal','urgent','critical') DEFAULT 'normal',
     status ENUM('open','fulfilled','closed') DEFAULT 'open',
+    image LONGTEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (requester_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
@@ -68,6 +70,7 @@ CREATE TABLE items (
     location VARCHAR(150),
     date_occurred DATE,
     status ENUM('pending','claimed','closed') DEFAULT 'pending',
+    image LONGTEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (posted_by) REFERENCES users(user_id) ON DELETE CASCADE
 );
@@ -96,6 +99,17 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
+-- 8. COMMENTS TABLE (simple comments on blood requests or lost&found items)
+CREATE TABLE comments (
+    comment_id INT AUTO_INCREMENT PRIMARY KEY,
+    post_type ENUM('blood','item') NOT NULL,
+    post_id INT NOT NULL,
+    user_id INT NOT NULL,
+    comment_text TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
 -- ===================================================
 -- INDEXES (for performance)
 -- ===================================================
@@ -103,3 +117,4 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_blood_group ON users(blood_group);
 CREATE INDEX idx_requests_status_urgency ON blood_requests(status, urgency_level);
 CREATE INDEX idx_items_type_category_status ON items(item_type, category, status);
+CREATE INDEX idx_comments_post ON comments(post_type, post_id);

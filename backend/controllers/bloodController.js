@@ -120,3 +120,56 @@ exports.respondToRequest = async (req, res) => {
         res.status(500).json({ message: 'Server error.' });
     }
 };
+
+// Update a blood request (only the person who posted it can edit)
+exports.updateRequest = async (req, res) => {
+    try {
+        const user_id = req.user.user_id;
+        const { id } = req.params;
+        const { blood_group_needed, patient_name, hospital_location, units_needed, urgency_level, image } = req.body;
+
+        const [rows] = await db.query('SELECT requester_id, image FROM blood_requests WHERE request_id = ?', [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Request not found.' });
+        }
+        if (rows[0].requester_id !== user_id) {
+            return res.status(403).json({ message: 'You can only edit your own requests.' });
+        }
+
+        // keep the existing image if a new one wasn't sent
+        const finalImage = (image !== undefined && image !== null) ? image : rows[0].image;
+
+        await db.query(
+            `UPDATE blood_requests SET blood_group_needed = ?, patient_name = ?, hospital_location = ?, units_needed = ?, urgency_level = ?, image = ?
+             WHERE request_id = ?`,
+            [blood_group_needed, patient_name, hospital_location, units_needed || 1, urgency_level || 'normal', finalImage, id]
+        );
+
+        res.json({ message: 'Request updated successfully!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
+// Delete a blood request (only the person who posted it can delete)
+exports.deleteRequest = async (req, res) => {
+    try {
+        const user_id = req.user.user_id;
+        const { id } = req.params;
+
+        const [rows] = await db.query('SELECT requester_id FROM blood_requests WHERE request_id = ?', [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Request not found.' });
+        }
+        if (rows[0].requester_id !== user_id) {
+            return res.status(403).json({ message: 'You can only delete your own requests.' });
+        }
+
+        await db.query('DELETE FROM blood_requests WHERE request_id = ?', [id]);
+        res.json({ message: 'Request deleted.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};

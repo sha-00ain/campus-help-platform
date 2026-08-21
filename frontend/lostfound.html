@@ -2,22 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lost & Found - Campus Help Platform</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
 
-<nav>
-    <div class="nav-left">
-        <a class="back-arrow" onclick="goBack()">←</a>
-        <a class="logo" href="home.html">🎓 Campus Help Platform</a>
-    </div>
-    <div>
-        <a class="navlink" href="blood.html">Blood Donation</a>
-        <a class="navlink" href="profile.html">👤 Profile</a>
-        <a class="navlink" href="#" onclick="logout()">Logout</a>
-    </div>
-</nav>
+<header class="topbar">
+    <a href="home.html" class="logo-area">
+        <span class="logo-icon"><i class="fas fa-graduation-cap"></i></span>
+        <span>Campus<span style="color: var(--primary);">Help</span></span>
+    </a>
+    <nav class="nav-links">
+        <a href="home.html"><i class="fas fa-home"></i> Home</a>
+        <a href="blood.html"><i class="fas fa-tint"></i> Blood Donation</a>
+        <a href="lostfound.html" class="active-link"><i class="fas fa-box-open"></i> Lost & Found</a>
+        <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+        <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </nav>
+</header>
 
 <div class="container">
 
@@ -40,13 +47,15 @@
             <button onclick="loadItems()">Search</button>
         </div>
         <div id="itemsList">Loading...</div>
+        <div id="itemsPagination"></div>
     </div>
 
     <!-- Post item -->
     <div class="card" id="postSection" style="display:none;">
-        <h2>Post a Lost or Found Item</h2>
+        <h2 id="postSectionTitle">Post a Lost or Found Item</h2>
         <div id="postMsg"></div>
         <form id="itemForm">
+            <input type="hidden" id="editingItemId" value="">
             <label>Type</label>
             <select id="item_type" required>
                 <option value="lost">Lost</option>
@@ -72,7 +81,7 @@
             <input type="file" id="itemImage" accept="image/*">
             <img id="itemImagePreview" style="display:none; max-width:150px; margin-top:8px; border-radius:8px;">
 
-            <button type="submit">Post Item</button>
+            <button type="submit" id="itemSubmitBtn">Post Item</button>
         </form>
     </div>
 

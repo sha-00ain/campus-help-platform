@@ -83,3 +83,63 @@ function showMessage(elementId, text, type = 'success') {
     const el = document.getElementById(elementId);
     el.innerHTML = `<div class="msg ${type}">${text}</div>`;
 }
+
+// Build page-number pagination HTML like [1] {2} [3] ... [last]
+// containerId: where to render the buttons
+// totalItems: total number of items across all pages
+// pageSize: items per page (default 10)
+// currentPage: which page is active right now
+// onPageChangeFnName: the name (as a string) of a global function to call when a page is clicked
+function renderPagination(containerId, totalItems, pageSize, currentPage, onPageChangeFnName) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const totalPages = Math.ceil(totalItems / pageSize);
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+
+    let html = '<div class="pagination">';
+    for (let i = 1; i <= totalPages; i++) {
+        const isActive = i === currentPage;
+        html += `<button type="button" class="page-btn ${isActive ? 'active' : ''}" onclick="${onPageChangeFnName}(${i})">${i}</button>`;
+    }
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// ===== ADMIN API HELPERS =====
+function getAdminToken() {
+    return localStorage.getItem('adminToken');
+}
+
+function requireAdminLogin() {
+    if (!getAdminToken()) {
+        window.location.href = 'admin-login.html';
+    }
+}
+
+function adminLogout() {
+    localStorage.removeItem('adminToken');
+    window.location.href = 'admin-login.html';
+}
+
+// Generic function to call the backend API using the ADMIN token
+async function adminApiCall(endpoint, method = 'GET', body = null, useAuth = true) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (useAuth && getAdminToken()) {
+        headers['Authorization'] = 'Bearer ' + getAdminToken();
+    }
+
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+
+    const response = await fetch(API_BASE + endpoint, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+    }
+    return data;
+}

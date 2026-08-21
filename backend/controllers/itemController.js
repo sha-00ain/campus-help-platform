@@ -129,3 +129,55 @@ exports.updateClaimStatus = async (req, res) => {
         res.status(500).json({ message: 'Server error.' });
     }
 };
+
+// Update an item (only the person who posted it can edit)
+exports.updateItem = async (req, res) => {
+    try {
+        const user_id = req.user.user_id;
+        const { id } = req.params;
+        const { item_type, category, title, description, location, date_occurred, image } = req.body;
+
+        const [rows] = await db.query('SELECT posted_by, image FROM items WHERE item_id = ?', [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Item not found.' });
+        }
+        if (rows[0].posted_by !== user_id) {
+            return res.status(403).json({ message: 'You can only edit your own posts.' });
+        }
+
+        const finalImage = (image !== undefined && image !== null) ? image : rows[0].image;
+
+        await db.query(
+            `UPDATE items SET item_type = ?, category = ?, title = ?, description = ?, location = ?, date_occurred = ?, image = ?
+             WHERE item_id = ?`,
+            [item_type, category, title, description, location, date_occurred, finalImage, id]
+        );
+
+        res.json({ message: 'Item updated successfully!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
+// Delete an item (only the person who posted it can delete)
+exports.deleteItem = async (req, res) => {
+    try {
+        const user_id = req.user.user_id;
+        const { id } = req.params;
+
+        const [rows] = await db.query('SELECT posted_by FROM items WHERE item_id = ?', [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Item not found.' });
+        }
+        if (rows[0].posted_by !== user_id) {
+            return res.status(403).json({ message: 'You can only delete your own posts.' });
+        }
+
+        await db.query('DELETE FROM items WHERE item_id = ?', [id]);
+        res.json({ message: 'Item deleted.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};

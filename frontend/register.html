@@ -306,10 +306,10 @@
 <body>
   <!-- Smart sticky header -->
   <header class="topbar" id="smartHeader">
-    <div class="logo-area">
+    <a href="index.html" class="logo-area" style="text-decoration:none; color:inherit; cursor:pointer;">
       <span class="logo-icon"><i class="fas fa-graduation-cap"></i></span>
       <span>Campus<span style="color: var(--primary);">Help</span></span>
-    </div>
+    </a>
     <nav class="nav-links">
       <a href="#"><i class="fas fa-home"></i> Home</a>
       <a href="#"><i class="fas fa-sign-in-alt"></i> Login</a>
@@ -341,9 +341,10 @@
       <div class="form-group">
         <label for="regPassword"><i class="fas fa-key"></i> Password</label>
         <div class="password-field">
-          <input type="password" id="regPassword" placeholder="" value="">
+          <input type="password" id="regPassword" placeholder="" value="" minlength="4">
           <i class="fas fa-eye"></i>
         </div>
+        <div style="font-size:0.75rem; color:#8a99aa; margin-top:0.4rem;"><i class="fas fa-circle-info"></i> At least 4 characters</div>
       </div>
       
       <!-- Student/Staff ID & Phone -->
@@ -384,15 +385,6 @@
       <div class="optional-note">Already have an account? <a href="login.html" style="color: var(--primary); font-weight: 600; text-decoration:none;">Login</a></div>
       <hr />
       <div class="footer-note"><i class="fas fa-graduation-cap"></i> Campus Help Platform · community first</div>
-    </div>
-  </div>
-
-  <!-- Demo spacer to show scroll behavior -->
-  <div class="demo-spacer">
-    <div>
-      <i class="fas fa-arrow-down" style="display: block; font-size: 2rem; margin-bottom: 1rem; color: var(--primary);"></i>
-      Scroll down to hide the topbar<br>
-      <span style="font-size: 0.8rem; opacity: 0.7;">Scroll up to show it again</span>
     </div>
   </div>
 
@@ -452,6 +444,10 @@
 
       if (!name || !email || !password) {
         msgBox.innerHTML = '<div class="msg-box error">Please fill in your name, email, and password.</div>';
+        return;
+      }
+      if (password.length < 4) {
+        msgBox.innerHTML = '<div class="msg-box error">Password must be at least 4 characters long.</div>';
         return;
       }
       if (!email.toLowerCase().endsWith('@hamdarduniversity.edu.bd')) {

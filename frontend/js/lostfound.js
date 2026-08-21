@@ -1,4 +1,5 @@
 requireLogin();
+const currentUser = getUser();
 
 // Switch between tabs/sections
 function showSection(id) {
@@ -6,9 +7,15 @@ function showSection(id) {
         document.getElementById(s).style.display = (s === id) ? 'block' : 'none';
     });
     document.querySelectorAll('.tabs a').forEach(a => a.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) event.target.classList.add('active');
     if (id === 'claimsSection') loadMyClaims();
+    if (id === 'postSection') exitEditMode();
 }
+
+// ===== Pagination state for the items list =====
+const ITEMS_PAGE_SIZE = 10;
+let allItems = [];
+let currentItemsPage = 1;
 
 // Load items (with optional filters)
 async function loadItems() {
@@ -19,15 +26,30 @@ async function loadItems() {
         if (type) query.append('item_type', type);
         if (keyword) query.append('keyword', keyword);
 
-        const items = await apiCall('/items?' + query.toString(), 'GET');
-        const container = document.getElementById('itemsList');
+        allItems = await apiCall('/items?' + query.toString(), 'GET');
+        currentItemsPage = 1;
+        renderItemsPage(1);
+    } catch (err) {
+        document.getElementById('itemsList').innerHTML = `<div class="msg error">${err.message}</div>`;
+    }
+}
 
-        if (items.length === 0) {
-            container.innerHTML = '<p>No items found.</p>';
-            return;
-        }
+function renderItemsPage(page) {
+    currentItemsPage = page;
+    const container = document.getElementById('itemsList');
 
-        container.innerHTML = items.map(i => `
+    if (allItems.length === 0) {
+        container.innerHTML = '<p>No items found.</p>';
+        renderPagination('itemsPagination', 0, ITEMS_PAGE_SIZE, 1, 'renderItemsPage');
+        return;
+    }
+
+    const startIdx = (page - 1) * ITEMS_PAGE_SIZE;
+    const pageItems = allItems.slice(startIdx, startIdx + ITEMS_PAGE_SIZE);
+
+    container.innerHTML = pageItems.map(i => {
+        const isOwner = currentUser && i.posted_by === currentUser.user_id;
+        return `
             <div class="item-box">
                 <h4>${i.title}
                     <span class="tag ${i.item_type === 'found' ? 'found' : ''}">${i.item_type}</span>
@@ -36,12 +58,18 @@ async function loadItems() {
                 <p>${i.description || ''}</p>
                 <p><b>Category:</b> ${i.category || 'N/A'} | <b>Location:</b> ${i.location || 'N/A'}</p>
                 <p><b>Posted by:</b> ${i.posted_by_name} (${i.posted_by_phone || 'no phone'})</p>
-                <button onclick="claimItem(${i.item_id})">This is Mine / Claim</button>
+                ${isOwner
+                    ? `<div class="post-actions">
+                         <button class="btn-edit" onclick="editItem(${i.item_id})"><i class="fas fa-pen"></i> Edit</button>
+                         <button class="btn-delete" onclick="deleteItem(${i.item_id})"><i class="fas fa-trash"></i> Delete</button>
+                       </div>`
+                    : `<button onclick="claimItem(${i.item_id})">This is Mine / Claim</button>`
+                }
             </div>
-        `).join('');
-    } catch (err) {
-        document.getElementById('itemsList').innerHTML = `<div class="msg error">${err.message}</div>`;
-    }
+        `;
+    }).join('');
+
+    renderPagination('itemsPagination', allItems.length, ITEMS_PAGE_SIZE, page, 'renderItemsPage');
 }
 
 // Claim an item
@@ -51,6 +79,48 @@ async function claimItem(item_id) {
     try {
         await apiCall('/items/claim', 'POST', { item_id, proof_description: proof });
         alert('Claim request submitted! The poster will review it.');
+    } catch (err) {
+        alert('Error: ' + err.message);
+    }
+}
+
+// ===== Edit an existing item =====
+function editItem(item_id) {
+    const i = allItems.find(it => it.item_id === item_id);
+    if (!i) return;
+
+    document.getElementById('editingItemId').value = i.item_id;
+    document.getElementById('item_type').value = i.item_type;
+    document.getElementById('category').value = i.category || '';
+    document.getElementById('title').value = i.title;
+    document.getElementById('description').value = i.description || '';
+    document.getElementById('location').value = i.location || '';
+    document.getElementById('date_occurred').value = i.date_occurred ? i.date_occurred.split('T')[0] : '';
+
+    document.getElementById('postSectionTitle').innerText = 'Edit Item';
+    document.getElementById('itemSubmitBtn').innerText = 'Save Changes';
+
+    ['browseSection','postSection','claimsSection'].forEach(s => {
+        document.getElementById(s).style.display = (s === 'postSection') ? 'block' : 'none';
+    });
+    document.querySelectorAll('.tabs a').forEach(a => a.classList.remove('active'));
+    document.querySelectorAll('.tabs a')[1].classList.add('active');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function exitEditMode() {
+    document.getElementById('editingItemId').value = '';
+    document.getElementById('postSectionTitle').innerText = 'Post a Lost or Found Item';
+    document.getElementById('itemSubmitBtn').innerText = 'Post Item';
+}
+
+// ===== Delete an item =====
+async function deleteItem(item_id) {
+    if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+    try {
+        await apiCall(`/items/${item_id}`, 'DELETE');
+        loadItems();
     } catch (err) {
         alert('Error: ' + err.message);
     }
@@ -68,11 +138,13 @@ document.getElementById('itemImage').addEventListener('change', () => {
     }
 });
 
-// Post a new item
+// Post a new item OR save edits to an existing one
 document.getElementById('itemForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
         const image = await fileToBase64(document.getElementById('itemImage'));
+        const editingId = document.getElementById('editingItemId').value;
+
         const body = {
             item_type: document.getElementById('item_type').value,
             category: document.getElementById('category').value,
@@ -82,10 +154,19 @@ document.getElementById('itemForm').addEventListener('submit', async (e) => {
             date_occurred: document.getElementById('date_occurred').value || null,
             image: image
         };
-        await apiCall('/items', 'POST', body);
-        showMessage('postMsg', 'Item posted successfully!', 'success');
+
+        if (editingId) {
+            await apiCall(`/items/${editingId}`, 'PUT', body);
+            showMessage('postMsg', 'Item updated successfully!', 'success');
+        } else {
+            await apiCall('/items', 'POST', body);
+            showMessage('postMsg', 'Item posted successfully!', 'success');
+        }
+
         document.getElementById('itemForm').reset();
         document.getElementById('itemImagePreview').style.display = 'none';
+        exitEditMode();
+        loadItems();
     } catch (err) {
         showMessage('postMsg', err.message, 'error');
     }

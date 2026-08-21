@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login - Campus Help Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Inter',sans-serif; background: linear-gradient(145deg,#0b1b33,#1e293b);
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1.5rem;
+  }
+  .admin-card {
+    background:white; border-radius:24px; padding:2.5rem 2rem; width:100%; max-width:420px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.3);
+  }
+  .admin-icon {
+    width:60px; height:60px; border-radius:16px; background:#0b1b33; color:white;
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin-bottom:1.2rem;
+  }
+  h2 { font-size:1.6rem; font-weight:700; margin-bottom:0.3rem; }
+  .subhead { color:#6b7789; font-size:0.9rem; margin-bottom:1.6rem; }
+  label { display:block; font-weight:600; font-size:0.85rem; margin-bottom:0.35rem; }
+  input {
+    width:100%; padding:0.8rem 1.1rem; border:1.5px solid #e2e8f0; border-radius:14px;
+    font-size:0.95rem; margin-bottom:1.1rem; font-family:'Inter',sans-serif;
+  }
+  input:focus { outline:none; border-color:#0b1b33; }
+  button {
+    width:100%; background:#0b1b33; color:white; border:none; padding:0.85rem;
+    border-radius:30px; font-weight:700; font-size:0.95rem; cursor:pointer; transition:0.2s;
+  }
+  button:hover { background:#1e293b; }
+  .msg-box { padding:0.7rem 1rem; border-radius:10px; margin-bottom:1rem; font-size:0.85rem; }
+  .msg-box.error { background:#fdeaea; color:#d32f2f; }
+  .back-link { display:block; text-align:center; margin-top:1.2rem; font-size:0.85rem; color:#6b7789; text-decoration:none; }
+  .back-link:hover { color:#0b1b33; }
+</style>
+</head>
+<body>
+
+<div class="admin-card">
+  <div class="admin-icon"><i class="fas fa-user-shield"></i></div>
+  <h2>Admin Login</h2>
+  <div class="subhead">Restricted access — Campus Help Platform administrators only.</div>
+  <div id="msgBox"></div>
+
+  <label>Admin Email</label>
+  <input type="email" id="adminEmail" placeholder="admin@example.com">
+
+  <label>Password</label>
+  <input type="password" id="adminPassword" placeholder="••••••••">
+
+  <button id="adminLoginBtn"><i class="fas fa-lock-open"></i> Login</button>
+  <a href="login.html" class="back-link">← Back to regular login</a>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  document.getElementById('adminLoginBtn').addEventListener('click', async () => {
+    const msgBox = document.getElementById('msgBox');
+    msgBox.innerHTML = '';
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPassword').value;
+
+    if (!email || !password) {
+      msgBox.innerHTML = '<div class="msg-box error">Please enter both email and password.</div>';
+      return;
+    }
+
+    try {
+      const data = await adminApiCall('/admin/login', 'POST', { email, password }, false);
+      localStorage.setItem('adminToken', data.token);
+      window.location.href = 'admin-dashboard.html';
+    } catch (err) {
+      msgBox.innerHTML = `<div class="msg-box error">${err.message}</div>`;
+    }
+  });
+
+  document.getElementById('adminPassword').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('adminLoginBtn').click();
+  });
+</script>
+</body>
+</html>

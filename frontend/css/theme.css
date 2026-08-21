@@ -1,0 +1,165 @@
+/* ===== Shared Campus Help theme (Inter / blue) ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #f7f9fc;
+  --card-bg: #ffffff;
+  --primary: #1e5eff;
+  --primary-dark: #1749d0;
+  --primary-soft: #e9efff;
+  --text-dark: #0b1b33;
+  --text-muted: #4a5b6e;
+  --border: #e2e8f0;
+  --shadow-sm: 0 8px 20px rgba(0,0,0,0.03);
+  --shadow-md: 0 16px 32px rgba(0,0,0,0.07);
+  --radius: 22px;
+  --topbar-height: 76px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-dark);
+  line-height: 1.5;
+  min-height: 100vh;
+  padding-top: var(--topbar-height);
+}
+
+/* Topbar */
+.topbar {
+  position: fixed; top: 0; left: 0; width: 100%;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  z-index: 1000;
+  height: var(--topbar-height);
+}
+.logo-area {
+  display: flex; align-items: center; gap: 0.6rem;
+  font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em;
+  text-decoration: none; color: inherit; cursor: pointer;
+}
+.logo-icon {
+  background: var(--primary); color: white;
+  width: 42px; height: 42px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; box-shadow: 0 6px 14px rgba(30,95,255,0.25);
+}
+.nav-links { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.nav-links a {
+  text-decoration: none; font-weight: 600; font-size: 0.95rem; color: var(--text-dark);
+  padding: 0.5rem 0.8rem; border-radius: 30px; transition: 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-links a:hover { background: var(--primary-soft); color: var(--primary); }
+.nav-links a.active-link { background: var(--primary); color: white; box-shadow: 0 6px 12px rgba(30,95,255,0.25); }
+.nav-links .logout-btn {
+  background: transparent; border: 1.5px solid #fee2e2; color: #dc2626;
+  padding: 0.5rem 1.2rem; border-radius: 30px; font-weight: 600; font-size: 0.95rem;
+  cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
+  font-family: 'Inter', sans-serif;
+}
+.nav-links .logout-btn:hover { background: #fee2e2; border-color: #dc2626; }
+
+/* Container & cards */
+.container { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem; }
+.card {
+  background: var(--card-bg); border-radius: var(--radius);
+  box-shadow: var(--shadow-md); padding: 2rem; border: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+.card h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+.card p { color: var(--text-muted); }
+
+/* Tabs */
+.tabs { display: flex; gap: 0.6rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tabs a {
+  padding: 0.6rem 1.2rem; background: white; border-radius: 30px;
+  text-decoration: none; color: var(--text-dark); border: 1.5px solid var(--border);
+  font-size: 0.9rem; font-weight: 600; transition: 0.2s;
+}
+.tabs a:hover { border-color: var(--primary); color: var(--primary); }
+.tabs a.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* Form elements */
+label { display: block; font-weight: 600; font-size: 0.85rem; margin: 1rem 0 0.35rem; color: var(--text-dark); }
+input, select, textarea {
+  width: 100%; padding: 0.8rem 1.1rem; border: 1.5px solid var(--border); border-radius: 14px;
+  font-size: 0.95rem; background: #fafcff; transition: 0.2s; font-family: 'Inter', sans-serif;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--primary); background: white;
+  box-shadow: 0 0 0 4px rgba(30,95,255,0.1);
+}
+textarea { resize: vertical; min-height: 80px; }
+
+button, .btn-primary {
+  margin-top: 1.2rem; background: var(--primary); color: white; border: none;
+  padding: 0.75rem 1.5rem; border-radius: 30px; cursor: pointer; font-size: 0.95rem;
+  font-weight: 700; transition: 0.2s; box-shadow: 0 8px 16px rgba(30,95,255,0.2);
+  font-family: 'Inter', sans-serif;
+}
+button:hover, .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+button.secondary { background: #f0f0f0; color: var(--text-dark); box-shadow: none; }
+button.secondary:hover { background: #e2e8f0; transform: none; }
+
+/* Item cards (donor / lost&found listings) */
+.item-box {
+  background: #fafcff; border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.2rem 1.3rem; margin-bottom: 0.9rem;
+}
+.item-box h4 { color: var(--primary); margin-bottom: 0.4rem; font-size: 1rem; }
+.item-box p { font-size: 0.88rem; color: var(--text-muted); margin: 0.15rem 0; }
+
+.tag, .urgency-tag {
+  display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px; margin-left: 8px; text-transform: uppercase;
+  background: var(--primary-soft); color: var(--primary);
+}
+.tag.normal, .urgency-tag.normal { background: var(--primary-soft); color: var(--primary); }
+.tag.urgent, .urgency-tag.urgent { background: #fff3cd; color: #b45309; }
+.tag.critical, .urgency-tag.critical { background: #fdeaea; color: #d32f2f; }
+.tag.found { background: #dcfce7; color: #16a34a; }
+
+.msg { padding: 0.8rem 1rem; border-radius: 12px; margin-bottom: 1rem; font-size: 0.85rem; font-weight: 500; }
+.msg.success, .msg-box.success { background: #e6f7ee; color: #0e8a4d; }
+.msg.error, .msg-box.error { background: #fdeaea; color: #d32f2f; }
+
+.back-arrow { color: var(--text-dark); font-size: 1.3rem; text-decoration: none; cursor: pointer; }
+.back-arrow:hover { color: var(--primary); }
+.nav-left { display: flex; align-items: center; gap: 1rem; }
+
+@media (max-width: 600px) {
+  .topbar { flex-direction: column; align-items: flex-start; padding: 0.8rem 1rem; height: auto; min-height: var(--topbar-height); }
+  body { padding-top: 100px; }
+  :root { --topbar-height: 100px; }
+  .container { padding: 1rem; }
+  .card { padding: 1.2rem; }
+}
+
+/* Pagination */
+.pagination {
+  display: flex; justify-content: center; gap: 0.4rem; margin-top: 1.5rem; flex-wrap: wrap;
+}
+.page-btn {
+  min-width: 38px; height: 38px; padding: 0 0.5rem;
+  border: 1.5px solid var(--border); background: white; color: var(--text-dark);
+  border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+  transition: 0.2s; margin-top: 0; box-shadow: none;
+}
+.page-btn:hover { border-color: var(--primary); color: var(--primary); background: white; transform: none; }
+.page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* Edit/Delete action buttons on own posts */
+.post-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
+.btn-edit, .btn-delete {
+  margin-top: 0; padding: 0.4rem 1rem; font-size: 0.8rem; border-radius: 20px;
+  box-shadow: none; font-weight: 600;
+}
+.btn-edit { background: var(--primary-soft); color: var(--primary); }
+.btn-edit:hover { background: var(--primary); color: white; transform: none; }
+.btn-delete { background: #fdeaea; color: #d32f2f; }
+.btn-delete:hover { background: #d32f2f; color: white; transform: none; }
