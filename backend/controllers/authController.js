@@ -119,6 +119,20 @@ exports.getProfile = async (req, res) => {
     }
 };
 
+// DELETE current logged-in user's own account
+// (cascades to their donor profile, blood requests, items, claims, comments,
+// and notifications via FK ON DELETE CASCADE)
+exports.deleteOwnAccount = async (req, res) => {
+    try {
+        const user_id = req.user.user_id;
+        await db.query('DELETE FROM users WHERE user_id = ?', [user_id]);
+        res.json({ message: 'Account deleted successfully.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
 // UPDATE current logged-in user's profile
 exports.updateProfile = async (req, res) => {
     try {

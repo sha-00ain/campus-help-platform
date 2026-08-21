@@ -768,6 +768,15 @@
           <button class="btn-save" onclick="saveChanges()"><i class="fas fa-check"></i> Save Changes</button>
           <button class="btn-cancel" onclick="cancelEdit()"><i class="fas fa-times"></i> Cancel</button>
         </div>
+
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+          <button class="btn-danger" onclick="deleteMyAccount()" style="width:100%; justify-content:center;">
+            <i class="fas fa-user-slash"></i> Delete My Account
+          </button>
+          <p style="font-size:0.78rem; color:var(--text-muted); text-align:center; margin-top:0.6rem;">
+            This will permanently delete your account and all your posts, comments, and donor info.
+          </p>
+        </div>
       </div>
     </div>
 
@@ -1262,6 +1271,28 @@
         alert('✅ Profile updated successfully!');
       } catch (err) {
         alert('Error: ' + err.message);
+      }
+    }
+
+    async function deleteMyAccount() {
+      const confirmed = confirm(
+        'Are you absolutely sure you want to delete your account?\n\n' +
+        'This will permanently remove your profile, posts, comments, and donor info. This cannot be undone.'
+      );
+      if (!confirmed) return;
+
+      const typed = prompt('Type DELETE to confirm account deletion:');
+      if (typed !== 'DELETE') {
+        if (typed !== null) alert('Account deletion cancelled — text did not match.');
+        return;
+      }
+
+      try {
+        await apiCall('/auth/profile', 'DELETE');
+        alert('Your account has been deleted. Goodbye!');
+        logout();
+      } catch (err) {
+        alert('Error deleting account: ' + err.message);
       }
     }
 
