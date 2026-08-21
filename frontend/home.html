@@ -223,7 +223,9 @@
       color: var(--text-muted);
     }
 
-    /* Feed section with sticky title */
+    /* Feed section with sticky title.
+       The card itself becomes the scroll container so the header can stay
+       pinned to the top of it while the posts inside scroll underneath. */
     .feed-card {
       background: var(--card-bg);
       border-radius: 28px;
@@ -231,12 +233,18 @@
       border: 1px solid var(--border);
       margin-bottom: 2rem;
       position: relative;
+      max-height: 640px;
+      overflow-y: auto;
     }
 
     .feed-header {
+      position: sticky;
+      top: 0;
       background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(4px);
       padding: 1.5rem 2rem 1rem 2rem;
       border-bottom: 1px solid var(--border);
+      z-index: 2;
     }
 
     .feed-header h2 {
@@ -316,11 +324,18 @@
     .comment-avatar {
       width: 32px; height: 32px; border-radius: 50%; background: var(--primary-soft); color: var(--primary);
       display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
+      overflow: hidden;
     }
+    .comment-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .comment-body { flex: 1; }
     .comment-author { font-weight: 600; font-size: 0.85rem; }
     .comment-time { font-size: 0.7rem; color: #9aa7b8; margin-left: 6px; }
     .comment-text { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+    .comment-delete-btn {
+      background: none; border: none; color: #c3ccd6; cursor: pointer; font-size: 0.85rem;
+      padding: 4px; margin-left: auto; flex-shrink: 0; transition: 0.2s;
+    }
+    .comment-delete-btn:hover { color: #d32f2f; }
     .no-comments { color: #9aa7b8; font-size: 0.85rem; text-align: center; padding: 1rem 0; }
     .feed-post { cursor: pointer; transition: 0.15s; }
     .feed-post:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
@@ -513,8 +528,6 @@
     </a>
     <nav class="nav-links">
       <a href="#" class="active-link"><i class="fas fa-home"></i> Home</a>
-      <a href="blood.html"><i class="fas fa-tint"></i> Blood</a>
-      <a href="lostfound.html"><i class="fas fa-box-open"></i> Lost & Found</a>
       <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
       <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </nav>

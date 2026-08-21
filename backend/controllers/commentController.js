@@ -34,7 +34,7 @@ exports.getComments = async (req, res) => {
         const { postType, postId } = req.params;
 
         const [comments] = await db.query(
-            `SELECT c.comment_id, c.comment_text, c.created_at, u.user_id, u.name
+            `SELECT c.comment_id, c.comment_text, c.created_at, u.user_id, u.name, u.profile_picture
              FROM comments c
              JOIN users u ON c.user_id = u.user_id
              WHERE c.post_type = ? AND c.post_id = ?

@@ -201,16 +201,24 @@ async function loadDetailComments() {
             container.innerHTML = '<p class="no-comments">No comments yet. Be the first to comment!</p>';
             return;
         }
-        container.innerHTML = comments.map(c => `
+        const currentUser = getUser();
+        container.innerHTML = comments.map(c => {
+            const isMine = currentUser && c.user_id === currentUser.user_id;
+            const avatar = c.profile_picture
+                ? `<img src="${c.profile_picture}" alt="${c.name}">`
+                : c.name.charAt(0).toUpperCase();
+            return `
             <div class="comment-item">
-                <div class="comment-avatar">${c.name.charAt(0).toUpperCase()}</div>
+                <div class="comment-avatar">${avatar}</div>
                 <div class="comment-body">
                     <span class="comment-author">${c.name}</span>
                     <span class="comment-time">${timeAgo(c.created_at)}</span>
                     <div class="comment-text">${c.comment_text}</div>
                 </div>
+                ${isMine ? `<button class="comment-delete-btn" onclick="deleteComment(${c.comment_id})" title="Delete comment"><i class="fas fa-trash"></i></button>` : ''}
             </div>
-        `).join('');
+            `;
+        }).join('');
     } catch (err) {
         container.innerHTML = `<p class="no-comments">Could not load comments.</p>`;
     }
@@ -231,6 +239,16 @@ async function submitComment() {
         loadDetailComments();
     } catch (err) {
         alert('Error posting comment: ' + err.message);
+    }
+}
+
+async function deleteComment(comment_id) {
+    if (!confirm('Delete this comment?')) return;
+    try {
+        await apiCall(`/comments/${comment_id}`, 'DELETE');
+        loadDetailComments();
+    } catch (err) {
+        alert('Error deleting comment: ' + err.message);
     }
 }
 
