@@ -10,6 +10,7 @@ router.post('/login', adminController.login);
 router.get('/stats', verifyAdmin, adminController.getStats);
 router.get('/users', verifyAdmin, adminController.getAllUsers);
 router.put('/users/:id/block', verifyAdmin, adminController.setUserBlockStatus);
+router.delete('/users/:id', verifyAdmin, adminController.deleteUser);
 
 router.get('/blood', verifyAdmin, adminController.getAllBloodRequests);
 router.put('/blood/:id', verifyAdmin, adminController.updateAnyBloodRequest);

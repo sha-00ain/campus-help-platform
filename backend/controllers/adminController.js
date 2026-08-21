@@ -77,6 +77,25 @@ exports.setUserBlockStatus = async (req, res) => {
     }
 };
 
+// Permanently delete a user account (cascades to their donor profile,
+// blood requests, items, claims, comments, and notifications via FK ON DELETE CASCADE)
+exports.deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [rows] = await db.query('SELECT user_id, role FROM users WHERE user_id = ?', [id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        await db.query('DELETE FROM users WHERE user_id = ?', [id]);
+        res.json({ message: 'User account deleted.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
 // ===== POST MODERATION (admin can see/edit/delete ANY post) =====
 exports.getAllBloodRequests = async (req, res) => {
     try {

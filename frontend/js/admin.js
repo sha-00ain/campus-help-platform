@@ -28,11 +28,14 @@ async function loadStats() {
 }
 
 // ===== USERS TAB =====
+let allUsers = [];
+
 async function loadUsers() {
     const panel = document.getElementById('panel-users');
     panel.innerHTML = '<div class="loading-text">Loading users...</div>';
     try {
         const users = await adminApiCall('/admin/users', 'GET');
+        allUsers = users;
         if (users.length === 0) {
             panel.innerHTML = '<p class="loading-text">No users found.</p>';
             return;
@@ -41,9 +44,9 @@ async function loadUsers() {
             <table>
                 <thead><tr><th>Name</th><th>Email</th><th>Blood Group</th><th>Status</th><th>Action</th></tr></thead>
                 <tbody>
-                    ${users.map(u => `
+                    ${users.map((u, idx) => `
                         <tr>
-                            <td>${u.name}</td>
+                            <td><button class="user-name-link" onclick="openUserDetails(${idx})">${u.name}</button></td>
                             <td>${u.email}</td>
                             <td>${u.blood_group || '-'}</td>
                             <td><span class="badge ${u.is_active ? 'active' : 'blocked'}">${u.is_active ? 'Active' : 'Blocked'}</span></td>
@@ -73,6 +76,56 @@ async function toggleBlock(userId, makeActive) {
         alert('Error: ' + err.message);
     }
 }
+
+// ===== USER DETAILS MODAL =====
+function openUserDetails(idx) {
+    const u = allUsers[idx];
+    if (!u) return;
+    const joined = u.created_at ? new Date(u.created_at.replace(' ', 'T')).toLocaleDateString() : '-';
+    document.getElementById('userDetailsBody').innerHTML = `
+        <div class="detail-row"><span>Name</span><span>${u.name}</span></div>
+        <div class="detail-row"><span>Email</span><span>${u.email}</span></div>
+        <div class="detail-row"><span>Student/Staff ID</span><span>${u.student_id || '-'}</span></div>
+        <div class="detail-row"><span>Phone</span><span>${u.phone || '-'}</span></div>
+        <div class="detail-row"><span>Blood Group</span><span>${u.blood_group || '-'}</span></div>
+        <div class="detail-row"><span>Department</span><span>${u.department || '-'}</span></div>
+        <div class="detail-row"><span>Role</span><span>${u.role}</span></div>
+        <div class="detail-row"><span>Status</span><span><span class="badge ${u.is_active ? 'active' : 'blocked'}">${u.is_active ? 'Active' : 'Blocked'}</span></span></div>
+        <div class="detail-row"><span>Joined</span><span>${joined}</span></div>
+        <div class="modal-actions">
+            ${u.is_active
+                ? `<button class="btn-modal btn-block" onclick="toggleBlock(${u.user_id}, false); closeUserModal();"><i class="fas fa-ban"></i> Block</button>`
+                : `<button class="btn-modal btn-unblock" onclick="toggleBlock(${u.user_id}, true); closeUserModal();"><i class="fas fa-check"></i> Unblock</button>`
+            }
+            <button class="btn-modal btn-del" onclick="deleteUserAccount(${u.user_id})"><i class="fas fa-trash"></i> Delete Account</button>
+        </div>
+    `;
+    document.getElementById('userDetailsModal').classList.add('active');
+}
+
+function closeUserModal() {
+    document.getElementById('userDetailsModal').classList.remove('active');
+}
+
+function closeUserModalOnOverlay(event) {
+    if (event.target.id === 'userDetailsModal') closeUserModal();
+}
+
+async function deleteUserAccount(userId) {
+    if (!confirm('Permanently delete this user account? This will remove all of their posts, comments, and donor info too. This cannot be undone.')) return;
+    try {
+        await adminApiCall(`/admin/users/${userId}`, 'DELETE');
+        closeUserModal();
+        loadUsers();
+        loadStats();
+    } catch (err) {
+        alert('Error: ' + err.message);
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeUserModal();
+});
 
 // ===== BLOOD REQUESTS TAB =====
 async function loadBloodRequests() {

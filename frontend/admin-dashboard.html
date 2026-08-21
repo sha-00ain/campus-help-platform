@@ -54,6 +54,32 @@
   .btn-unblock { background:#dcfce7; color:#16a34a; }
   .btn-del { background:#fdeaea; color:#d32f2f; }
   .loading-text { color:var(--muted); font-size:0.9rem; padding:1rem 0; }
+
+  .user-name-link { color:var(--primary); font-weight:600; cursor:pointer; background:none; border:none; padding:0; font-family:'Inter',sans-serif; font-size:inherit; text-align:left; }
+  .user-name-link:hover { text-decoration:underline; }
+
+  /* ===== USER DETAILS MODAL ===== */
+  .modal-overlay {
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.55); z-index:2000; justify-content:center; align-items:center; padding:1.5rem;
+  }
+  .modal-overlay.active { display:flex; }
+  .modal-box {
+    background:white; border-radius:20px; padding:2rem; max-width:480px; width:100%;
+    max-height:90vh; overflow-y:auto; box-shadow:0 30px 60px rgba(0,0,0,0.35);
+  }
+  .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; }
+  .modal-header h2 { font-size:1.3rem; font-weight:700; }
+  .modal-close { font-size:1.8rem; cursor:pointer; color:var(--muted); line-height:1; }
+  .modal-close:hover { color:var(--dark); }
+  .detail-row { display:flex; justify-content:space-between; padding:0.6rem 0; border-bottom:1px solid var(--border); font-size:0.9rem; }
+  .detail-row span:first-child { color:var(--muted); font-weight:600; }
+  .detail-row span:last-child { font-weight:600; text-align:right; }
+  .modal-actions { display:flex; gap:0.6rem; margin-top:1.5rem; flex-wrap:wrap; }
+  .btn-modal {
+    padding:0.7rem 1.3rem; border-radius:30px; border:none; font-weight:700; font-size:0.85rem;
+    cursor:pointer; font-family:'Inter',sans-serif; flex:1;
+  }
 </style>
 </head>
 <body>
@@ -87,6 +113,17 @@
     <div class="loading-text">Loading items...</div>
   </div>
 
+</div>
+
+<!-- User Details Modal -->
+<div id="userDetailsModal" class="modal-overlay" onclick="closeUserModalOnOverlay(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2><i class="fas fa-user"></i> User Details</h2>
+      <span class="modal-close" onclick="closeUserModal()">&times;</span>
+    </div>
+    <div id="userDetailsBody"></div>
+  </div>
 </div>
 
 <script src="js/api.js"></script>
