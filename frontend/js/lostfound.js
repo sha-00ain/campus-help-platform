@@ -210,4 +210,13 @@ async function updateClaim(claim_id, status) {
 }
 
 // Load items on page load
-loadItems();
+// If we arrived here via a "?edit=<id>" link (e.g. from the home feed / latest activity),
+// automatically open that item in edit mode once the list has loaded.
+loadItems().then(() => {
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('edit');
+    if (editId) {
+        editItem(parseInt(editId));
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});

@@ -137,7 +137,13 @@ function openPostDetail(globalIdx) {
             <p style="margin:4px 0;"><b>Location:</b> ${post.hospital_location}</p>
             <p style="margin:4px 0;"><b>Units needed:</b> ${post.units_needed}</p>
             <p style="margin:4px 0; color:var(--text-muted); font-size:0.85rem;">Posted by ${post.requester_name}</p>
-            ${!isOwner ? `<button onclick="respondFromModal(${post.request_id})"><i class="fas fa-hand-holding-heart"></i> I Can Donate</button>` : ''}
+            ${!isOwner
+                ? `<button onclick="respondFromModal(${post.request_id})"><i class="fas fa-hand-holding-heart"></i> I Can Donate</button>`
+                : `<div class="post-actions">
+                     <button class="btn-edit" onclick="editPostFromFeed('blood', ${post.request_id})"><i class="fas fa-pen"></i> Edit</button>
+                     <button class="btn-delete" onclick="deletePostFromFeed('blood', ${post.request_id})"><i class="fas fa-trash"></i> Delete</button>
+                   </div>`
+            }
         `;
     } else {
         titleEl.innerText = `${post.item_type === 'found' ? '✅ Found' : '🎒 Lost'}: ${post.title}`;
@@ -148,7 +154,13 @@ function openPostDetail(globalIdx) {
             <p style="margin:4px 0;">${post.description || ''}</p>
             <p style="margin:4px 0;"><b>Category:</b> ${post.category || 'N/A'} | <b>Location:</b> ${post.location || 'N/A'}</p>
             <p style="margin:4px 0; color:var(--text-muted); font-size:0.85rem;">Posted by ${post.posted_by_name}</p>
-            ${!isOwner ? `<button onclick="claimFromModal(${post.item_id})"><i class="fas fa-hand-paper"></i> This is Mine / Claim</button>` : ''}
+            ${!isOwner
+                ? `<button onclick="claimFromModal(${post.item_id})"><i class="fas fa-hand-paper"></i> This is Mine / Claim</button>`
+                : `<div class="post-actions">
+                     <button class="btn-edit" onclick="editPostFromFeed('item', ${post.item_id})"><i class="fas fa-pen"></i> Edit</button>
+                     <button class="btn-delete" onclick="deletePostFromFeed('item', ${post.item_id})"><i class="fas fa-trash"></i> Delete</button>
+                   </div>`
+            }
         `;
     }
 
@@ -182,6 +194,32 @@ async function claimFromModal(item_id) {
     try {
         await apiCall('/items/claim', 'POST', { item_id, proof_description: proof });
         alert('Claim request submitted! The poster will review it.');
+    } catch (err) {
+        alert('Error: ' + err.message);
+    }
+}
+
+// ===== Edit / Delete a post directly from the Latest Activity feed =====
+// Editing reuses the full edit form already on blood.html / lostfound.html,
+// so we just deep-link there with the post id and let that page open edit mode.
+function editPostFromFeed(type, id) {
+    if (type === 'blood') {
+        window.location.href = `blood.html?edit=${id}`;
+    } else {
+        window.location.href = `lostfound.html?edit=${id}`;
+    }
+}
+
+async function deletePostFromFeed(type, id) {
+    if (!confirm('Are you sure you want to delete this post? This cannot be undone.')) return;
+    try {
+        if (type === 'blood') {
+            await apiCall(`/blood/requests/${id}`, 'DELETE');
+        } else {
+            await apiCall(`/items/${id}`, 'DELETE');
+        }
+        closeDetailModal();
+        loadFeed();
     } catch (err) {
         alert('Error: ' + err.message);
     }
