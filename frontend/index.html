@@ -8,6 +8,11 @@
     (function() {
       if (localStorage.getItem('token')) {
         window.location.replace('home.html');
+      } else {
+        // Wake up the backend as early as possible (Render's free tier sleeps
+        // after inactivity), so it's ready by the time the person clicks
+        // Login/Register on this landing page.
+        fetch('https://campus-help-platform-d7ce.onrender.com/').catch(function() {});
       }
     })();
   </script>

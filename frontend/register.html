@@ -390,6 +390,10 @@
 
   <script src="js/api.js"></script>
   <script>
+    // Wake up the backend right away (in case it's asleep on the free tier)
+    // so it's ready by the time the user finishes the form and hits Register.
+    wakeServer();
+
     // Smart scroll header
     (function() {
       const header = document.getElementById('smartHeader');
@@ -456,11 +460,20 @@
       }
 
       try {
+        const registerBtn = document.getElementById('registerBtn');
+        const originalBtnHTML = registerBtn.innerHTML;
+        registerBtn.disabled = true;
+        registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+        msgBox.innerHTML = '<div class="msg-box" style="background:#eef3ff; color:#1e5eff;">Connecting… this can take up to a minute if the server was asleep.</div>';
+
         await apiCall('/auth/register', 'POST', { name, email, password, student_id, phone, blood_group, department }, false);
         msgBox.innerHTML = '<div class="msg-box success">Registration successful! Redirecting to login...</div>';
         setTimeout(() => window.location.href = 'login.html', 1500);
       } catch (err) {
         msgBox.innerHTML = `<div class="msg-box error">${err.message}</div>`;
+        const registerBtn = document.getElementById('registerBtn');
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = '<i class="fas fa-user-check"></i> Register';
       }
     });
   </script>

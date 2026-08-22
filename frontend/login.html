@@ -341,6 +341,10 @@
       const topbar = document.getElementById('topbar');
       const msgBox = document.getElementById('msgBox');
 
+      // Wake up the backend right away (in case it's asleep on the free tier)
+      // so it's ready by the time the user finishes typing and hits Login.
+      wakeServer();
+
       // 1) Smart scroll behavior for topbar
       let lastScrollY = window.scrollY;
       let ticking = false;
@@ -411,6 +415,11 @@
           return;
         }
 
+        const originalBtnHTML = loginBtn.innerHTML;
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+        msgBox.innerHTML = '<div class="msg-box" style="background:#eef3ff; color:#1e5eff;">Connecting… this can take up to a minute if the server was asleep.</div>';
+
         try {
           const data = await apiCall('/auth/login', 'POST', { email, password }, false);
           localStorage.setItem('token', data.token);
@@ -418,6 +427,8 @@
           window.location.href = 'home.html';
         } catch (err) {
           msgBox.innerHTML = `<div class="msg-box error">${err.message}</div>`;
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = originalBtnHTML;
         }
       }
 

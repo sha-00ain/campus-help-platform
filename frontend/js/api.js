@@ -23,6 +23,17 @@ function requireLogin() {
     }
 }
 
+// Fire a lightweight, fire-and-forget request to wake up the backend.
+// Render's free tier puts the server to sleep after inactivity, and the
+// first real request can take 30-60s while it wakes up. Calling this as
+// soon as the login/register page loads means the server is already
+// waking up in the background while the person is still typing their
+// email and password, so the actual login/register click feels instant.
+function wakeServer() {
+    const rootUrl = API_BASE.replace(/\/api\/?$/, '/');
+    fetch(rootUrl).catch(() => {});
+}
+
 // Convert a selected <input type="file"> image into a base64 string (or null if none chosen)
 function fileToBase64(inputElement) {
     return new Promise((resolve, reject) => {
