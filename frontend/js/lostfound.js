@@ -9,7 +9,6 @@ function showSection(id) {
     document.querySelectorAll('.tabs a').forEach(a => a.classList.remove('active'));
     if (event && event.target) event.target.classList.add('active');
     if (id === 'claimsSection') loadMyClaims();
-    if (id === 'postSection') exitEditMode();
 }
 
 // ===== Pagination state for the items list =====
@@ -84,36 +83,74 @@ async function claimItem(item_id) {
     }
 }
 
-// ===== Edit an existing item =====
+// ===== Edit an existing item (opens in a modal dialog, in place) =====
 function editItem(item_id) {
     const i = allItems.find(it => it.item_id === item_id);
     if (!i) return;
 
-    document.getElementById('editingItemId').value = i.item_id;
-    document.getElementById('item_type').value = i.item_type;
-    document.getElementById('category').value = i.category || '';
-    document.getElementById('title').value = i.title;
-    document.getElementById('description').value = i.description || '';
-    document.getElementById('location').value = i.location || '';
-    document.getElementById('date_occurred').value = i.date_occurred ? i.date_occurred.split('T')[0] : '';
+    document.getElementById('editItemId').value = i.item_id;
+    document.getElementById('editItemType').value = i.item_type;
+    document.getElementById('editItemCategory').value = i.category || '';
+    document.getElementById('editItemTitle').value = i.title;
+    document.getElementById('editItemDescription').value = i.description || '';
+    document.getElementById('editItemLocation').value = i.location || '';
+    document.getElementById('editItemDate').value = i.date_occurred ? i.date_occurred.split('T')[0] : '';
+    document.getElementById('editItemImage').value = '';
+    document.getElementById('editItemImagePreview').style.display = 'none';
+    document.getElementById('editItemMsg').innerHTML = '';
 
-    document.getElementById('postSectionTitle').innerText = 'Edit Item';
-    document.getElementById('itemSubmitBtn').innerText = 'Save Changes';
-
-    ['browseSection','postSection','claimsSection'].forEach(s => {
-        document.getElementById(s).style.display = (s === 'postSection') ? 'block' : 'none';
-    });
-    document.querySelectorAll('.tabs a').forEach(a => a.classList.remove('active'));
-    document.querySelectorAll('.tabs a')[1].classList.add('active');
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('editItemModal').classList.add('active');
 }
 
-function exitEditMode() {
-    document.getElementById('editingItemId').value = '';
-    document.getElementById('postSectionTitle').innerText = 'Post a Lost or Found Item';
-    document.getElementById('itemSubmitBtn').innerText = 'Post Item';
+function closeEditItemModal() {
+    document.getElementById('editItemModal').classList.remove('active');
 }
+
+function closeEditItemModalOnOverlay(event) {
+    if (event.target.id === 'editItemModal') closeEditItemModal();
+}
+
+// Preview a newly-picked image inside the edit modal
+document.getElementById('editItemImage').addEventListener('change', () => {
+    const file = document.getElementById('editItemImage').files[0];
+    const preview = document.getElementById('editItemImagePreview');
+    if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+});
+
+// Save edits made in the modal
+document.getElementById('editItemForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        const image = await fileToBase64(document.getElementById('editItemImage'));
+        const editingId = document.getElementById('editItemId').value;
+
+        const body = {
+            item_type: document.getElementById('editItemType').value,
+            category: document.getElementById('editItemCategory').value,
+            title: document.getElementById('editItemTitle').value,
+            description: document.getElementById('editItemDescription').value,
+            location: document.getElementById('editItemLocation').value,
+            date_occurred: document.getElementById('editItemDate').value || null
+        };
+        if (image) body.image = image;
+
+        await apiCall(`/items/${editingId}`, 'PUT', body);
+        closeEditItemModal();
+        loadItems();
+    } catch (err) {
+        showMessage('editItemMsg', err.message, 'error');
+    }
+});
+
+// Close the edit modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeEditItemModal();
+});
 
 // ===== Delete an item =====
 async function deleteItem(item_id) {
@@ -138,12 +175,11 @@ document.getElementById('itemImage').addEventListener('change', () => {
     }
 });
 
-// Post a new item OR save edits to an existing one
+// Post a new item
 document.getElementById('itemForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
         const image = await fileToBase64(document.getElementById('itemImage'));
-        const editingId = document.getElementById('editingItemId').value;
 
         const body = {
             item_type: document.getElementById('item_type').value,
@@ -155,17 +191,11 @@ document.getElementById('itemForm').addEventListener('submit', async (e) => {
             image: image
         };
 
-        if (editingId) {
-            await apiCall(`/items/${editingId}`, 'PUT', body);
-            showMessage('postMsg', 'Item updated successfully!', 'success');
-        } else {
-            await apiCall('/items', 'POST', body);
-            showMessage('postMsg', 'Item posted successfully!', 'success');
-        }
+        await apiCall('/items', 'POST', body);
+        showMessage('postMsg', 'Item posted successfully!', 'success');
 
         document.getElementById('itemForm').reset();
         document.getElementById('itemImagePreview').style.display = 'none';
-        exitEditMode();
         loadItems();
     } catch (err) {
         showMessage('postMsg', err.message, 'error');

@@ -45,7 +45,6 @@
         <h2 id="postSectionTitle">Post a Blood Request</h2>
         <div id="postMsg"></div>
         <form id="requestForm">
-            <input type="hidden" id="editingRequestId" value="">
             <label>Blood Group Needed</label>
             <select id="blood_group_needed" required>
                 <option value="">-- Select --</option>
@@ -105,6 +104,54 @@
         <button onclick="becomeDonor()">Register as Donor</button>
     </div>
 
+</div>
+
+<!-- Edit Blood Request Modal (opens in place, without leaving this page) -->
+<div id="editRequestModal" class="modal-overlay" onclick="closeEditRequestModalOnOverlay(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2><i class="fas fa-pen"></i> Edit Blood Request</h2>
+      <span class="modal-close" onclick="closeEditRequestModal()">&times;</span>
+    </div>
+    <div id="editRequestMsg"></div>
+    <form id="editRequestForm">
+      <input type="hidden" id="editReqId" value="">
+
+      <label>Blood Group Needed</label>
+      <select id="editReqBloodGroup" required>
+        <option value="">-- Select --</option>
+        <option>A+</option><option>A-</option>
+        <option>B+</option><option>B-</option>
+        <option>O+</option><option>O-</option>
+        <option>AB+</option><option>AB-</option>
+      </select>
+
+      <label>Patient Name</label>
+      <input type="text" id="editReqPatientName">
+
+      <label>Hospital / Location</label>
+      <input type="text" id="editReqLocation" required>
+
+      <label>Units Needed</label>
+      <input type="number" id="editReqUnits" value="1" min="1">
+
+      <label>Urgency</label>
+      <select id="editReqUrgency">
+        <option value="normal">Normal</option>
+        <option value="urgent">Urgent</option>
+        <option value="critical">Critical</option>
+      </select>
+
+      <label>Photo (optional, leave blank to keep current)</label>
+      <input type="file" id="editReqImage" accept="image/*">
+      <img id="editReqImagePreview" style="display:none; max-width:150px; margin-top:8px; border-radius:8px;">
+
+      <div style="display:flex; gap:0.6rem; margin-top:1.2rem; flex-wrap:wrap;">
+        <button type="submit"><i class="fas fa-check"></i> Save Changes</button>
+        <button type="button" class="secondary" onclick="closeEditRequestModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script src="js/api.js"></script>

@@ -53,7 +53,6 @@
         <h2 id="postSectionTitle">Post a Lost or Found Item</h2>
         <div id="postMsg"></div>
         <form id="itemForm">
-            <input type="hidden" id="editingItemId" value="">
             <label>Type</label>
             <select id="item_type" required>
                 <option value="lost">Lost</option>
@@ -89,6 +88,50 @@
         <div id="claimsList">Loading...</div>
     </div>
 
+</div>
+
+<!-- Edit Item Modal (opens in place, without leaving this page) -->
+<div id="editItemModal" class="modal-overlay" onclick="closeEditItemModalOnOverlay(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2><i class="fas fa-pen"></i> Edit Item</h2>
+      <span class="modal-close" onclick="closeEditItemModal()">&times;</span>
+    </div>
+    <div id="editItemMsg"></div>
+    <form id="editItemForm">
+      <input type="hidden" id="editItemId" value="">
+
+      <label>Type</label>
+      <select id="editItemType" required>
+        <option value="lost">Lost</option>
+        <option value="found">Found</option>
+      </select>
+
+      <label>Category</label>
+      <input type="text" id="editItemCategory" placeholder="e.g. Electronics, Bag, Documents">
+
+      <label>Title</label>
+      <input type="text" id="editItemTitle" required placeholder="e.g. Black backpack">
+
+      <label>Description</label>
+      <textarea id="editItemDescription" placeholder="Describe the item in detail..."></textarea>
+
+      <label>Location</label>
+      <input type="text" id="editItemLocation" placeholder="e.g. Library, 2nd floor">
+
+      <label>Date</label>
+      <input type="date" id="editItemDate">
+
+      <label>Photo (optional, leave blank to keep current)</label>
+      <input type="file" id="editItemImage" accept="image/*">
+      <img id="editItemImagePreview" style="display:none; max-width:150px; margin-top:8px; border-radius:8px;">
+
+      <div style="display:flex; gap:0.6rem; margin-top:1.2rem; flex-wrap:wrap;">
+        <button type="submit"><i class="fas fa-check"></i> Save Changes</button>
+        <button type="button" class="secondary" onclick="closeEditItemModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script src="js/api.js"></script>

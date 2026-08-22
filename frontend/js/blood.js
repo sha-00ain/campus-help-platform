@@ -8,11 +8,6 @@ function showSection(id) {
     });
     document.querySelectorAll('.tabs a').forEach(a => a.classList.remove('active'));
     if (event && event.target) event.target.classList.add('active');
-
-    // reset the post form back to "create" mode whenever we navigate to it fresh via tabs
-    if (id === 'postSection') {
-        exitEditMode();
-    }
 }
 
 // ===== Pagination state for the requests list =====
@@ -80,36 +75,72 @@ async function respondToRequest(request_id) {
     }
 }
 
-// ===== Edit an existing request =====
+// ===== Edit an existing request (opens in a modal dialog, in place) =====
 function editRequest(request_id) {
     const r = allRequests.find(req => req.request_id === request_id);
     if (!r) return;
 
-    document.getElementById('editingRequestId').value = r.request_id;
-    document.getElementById('blood_group_needed').value = r.blood_group_needed;
-    document.getElementById('patient_name').value = r.patient_name || '';
-    document.getElementById('hospital_location').value = r.hospital_location;
-    document.getElementById('units_needed').value = r.units_needed;
-    document.getElementById('urgency_level').value = r.urgency_level;
+    document.getElementById('editReqId').value = r.request_id;
+    document.getElementById('editReqBloodGroup').value = r.blood_group_needed;
+    document.getElementById('editReqPatientName').value = r.patient_name || '';
+    document.getElementById('editReqLocation').value = r.hospital_location;
+    document.getElementById('editReqUnits').value = r.units_needed;
+    document.getElementById('editReqUrgency').value = r.urgency_level;
+    document.getElementById('editReqImage').value = '';
+    document.getElementById('editReqImagePreview').style.display = 'none';
+    document.getElementById('editRequestMsg').innerHTML = '';
 
-    document.getElementById('postSectionTitle').innerText = 'Edit Blood Request';
-    document.getElementById('requestSubmitBtn').innerText = 'Save Changes';
-
-    // switch tabs to the post section
-    ['requestsSection','postSection','searchSection','donorSection'].forEach(s => {
-        document.getElementById(s).style.display = (s === 'postSection') ? 'block' : 'none';
-    });
-    document.querySelectorAll('.tabs a').forEach(a => a.classList.remove('active'));
-    document.querySelectorAll('.tabs a')[1].classList.add('active');
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('editRequestModal').classList.add('active');
 }
 
-function exitEditMode() {
-    document.getElementById('editingRequestId').value = '';
-    document.getElementById('postSectionTitle').innerText = 'Post a Blood Request';
-    document.getElementById('requestSubmitBtn').innerText = 'Post Request';
+function closeEditRequestModal() {
+    document.getElementById('editRequestModal').classList.remove('active');
 }
+
+function closeEditRequestModalOnOverlay(event) {
+    if (event.target.id === 'editRequestModal') closeEditRequestModal();
+}
+
+// Preview a newly-picked image inside the edit modal
+document.getElementById('editReqImage').addEventListener('change', () => {
+    const file = document.getElementById('editReqImage').files[0];
+    const preview = document.getElementById('editReqImagePreview');
+    if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+});
+
+// Save edits made in the modal
+document.getElementById('editRequestForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        const image = await fileToBase64(document.getElementById('editReqImage'));
+        const editingId = document.getElementById('editReqId').value;
+
+        const body = {
+            blood_group_needed: document.getElementById('editReqBloodGroup').value,
+            patient_name: document.getElementById('editReqPatientName').value,
+            hospital_location: document.getElementById('editReqLocation').value,
+            units_needed: document.getElementById('editReqUnits').value,
+            urgency_level: document.getElementById('editReqUrgency').value
+        };
+        if (image) body.image = image;
+
+        await apiCall(`/blood/requests/${editingId}`, 'PUT', body);
+        closeEditRequestModal();
+        loadRequests();
+    } catch (err) {
+        showMessage('editRequestMsg', err.message, 'error');
+    }
+});
+
+// Close the edit modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeEditRequestModal();
+});
 
 // ===== Delete a request =====
 async function deleteRequest(request_id) {
@@ -134,12 +165,11 @@ document.getElementById('requestImage').addEventListener('change', () => {
     }
 });
 
-// Post a new blood request OR save edits to an existing one
+// Post a new blood request
 document.getElementById('requestForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
         const image = await fileToBase64(document.getElementById('requestImage'));
-        const editingId = document.getElementById('editingRequestId').value;
 
         const body = {
             blood_group_needed: document.getElementById('blood_group_needed').value,
@@ -150,17 +180,11 @@ document.getElementById('requestForm').addEventListener('submit', async (e) => {
             image: image
         };
 
-        if (editingId) {
-            await apiCall(`/blood/requests/${editingId}`, 'PUT', body);
-            showMessage('postMsg', 'Request updated successfully!', 'success');
-        } else {
-            await apiCall('/blood/requests', 'POST', body);
-            showMessage('postMsg', 'Request posted successfully!', 'success');
-        }
+        await apiCall('/blood/requests', 'POST', body);
+        showMessage('postMsg', 'Request posted successfully!', 'success');
 
         document.getElementById('requestForm').reset();
         document.getElementById('requestImagePreview').style.display = 'none';
-        exitEditMode();
         loadRequests();
     } catch (err) {
         showMessage('postMsg', err.message, 'error');
