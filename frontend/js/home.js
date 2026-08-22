@@ -125,6 +125,7 @@ function openPostDetail(globalIdx) {
     if (!post) return;
     currentDetailPost = post;
     currentDetailIdx = globalIdx;
+    cancelReply();
     renderPostDetailView();
     document.getElementById('postDetailModal').classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -327,6 +328,7 @@ function closeDetailModal() {
     document.body.style.overflow = '';
     currentDetailPost = null;
     currentDetailIdx = null;
+    cancelReply();
 }
 
 function closeDetailModalOnOverlay(event) {
@@ -354,6 +356,8 @@ async function claimFromModal(item_id) {
 }
 
 // ===== Comments =====
+let replyingTo = null; // { comment_id, name } or null
+
 async function loadDetailComments() {
     if (!currentDetailPost) return;
     const postType = currentDetailPost.feed_type;
@@ -370,16 +374,21 @@ async function loadDetailComments() {
         const currentUser = getUser();
         container.innerHTML = comments.map(c => {
             const isMine = currentUser && c.user_id === currentUser.user_id;
+            const isReply = !!c.parent_comment_id;
             const avatar = c.profile_picture
                 ? `<img src="${c.profile_picture}" alt="${c.name}">`
                 : c.name.charAt(0).toUpperCase();
             return `
-            <div class="comment-item">
+            <div class="comment-item${isReply ? ' is-reply' : ''}">
                 <div class="comment-avatar">${avatar}</div>
                 <div class="comment-body">
+                    ${isReply ? `<div class="reply-to-tag"><i class="fas fa-reply"></i> Replying to ${c.reply_to_name || 'comment'}</div>` : ''}
                     <span class="comment-author">${c.name}</span>
                     <span class="comment-time">${timeAgo(c.created_at)}</span>
                     <div class="comment-text">${c.comment_text}</div>
+                    <div class="comment-actions-row">
+                        ${!isReply ? `<button class="comment-reply-btn" onclick="startReply(${c.comment_id}, '${c.name.replace(/'/g, "\\'")}')"><i class="fas fa-reply"></i> Reply</button>` : ''}
+                    </div>
                 </div>
                 ${isMine ? `<button class="comment-delete-btn" onclick="deleteComment(${c.comment_id})" title="Delete comment"><i class="fas fa-trash"></i></button>` : ''}
             </div>
@@ -388,6 +397,19 @@ async function loadDetailComments() {
     } catch (err) {
         container.innerHTML = `<p class="no-comments">Could not load comments.</p>`;
     }
+}
+
+function startReply(comment_id, name) {
+    replyingTo = { comment_id, name };
+    const banner = document.getElementById('replyingBanner');
+    document.getElementById('replyingBannerText').innerText = `Replying to ${name}`;
+    banner.classList.add('active');
+    document.getElementById('newCommentText').focus();
+}
+
+function cancelReply() {
+    replyingTo = null;
+    document.getElementById('replyingBanner').classList.remove('active');
 }
 
 async function submitComment() {
@@ -400,8 +422,12 @@ async function submitComment() {
     const postId = postType === 'blood' ? currentDetailPost.request_id : currentDetailPost.item_id;
 
     try {
-        await apiCall('/comments', 'POST', { post_type: postType, post_id: postId, comment_text: text });
+        const body = { post_type: postType, post_id: postId, comment_text: text };
+        if (replyingTo) body.parent_comment_id = replyingTo.comment_id;
+
+        await apiCall('/comments', 'POST', body);
         textEl.value = '';
+        cancelReply();
         loadDetailComments();
     } catch (err) {
         alert('Error posting comment: ' + err.message);

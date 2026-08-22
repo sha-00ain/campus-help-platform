@@ -100,14 +100,18 @@ CREATE TABLE notifications (
 );
 
 -- 8. COMMENTS TABLE (simple comments on blood requests or lost&found items)
+-- parent_comment_id lets a comment be a reply to another comment on the same
+-- post (one level deep - a reply cannot itself be replied to).
 CREATE TABLE comments (
     comment_id INT AUTO_INCREMENT PRIMARY KEY,
     post_type ENUM('blood','item') NOT NULL,
     post_id INT NOT NULL,
     user_id INT NOT NULL,
     comment_text TEXT NOT NULL,
+    parent_comment_id INT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_comment_id) REFERENCES comments(comment_id) ON DELETE CASCADE
 );
 
 -- ===================================================

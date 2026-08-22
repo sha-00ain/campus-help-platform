@@ -248,30 +248,59 @@ exports.getAllComments = async (req, res) => {
     }
 };
 
-// Get all comments for one specific post (admin view, works for any post)
+// Get all comments for one specific post (admin view, works for any post) -
+// threaded the same way as the public comment endpoint
 exports.getCommentsForPost = async (req, res) => {
     try {
         const { postType, postId } = req.params;
 
-        const [comments] = await db.query(
-            `SELECT c.comment_id, c.comment_text, c.created_at, u.user_id, u.name, u.profile_picture
+        const [rows] = await db.query(
+            `SELECT c.comment_id, c.comment_text, c.created_at, c.parent_comment_id,
+                    u.user_id, u.name, u.profile_picture,
+                    ru.name AS reply_to_name
              FROM comments c
              JOIN users u ON c.user_id = u.user_id
+             LEFT JOIN comments pc ON c.parent_comment_id = pc.comment_id
+             LEFT JOIN users ru ON pc.user_id = ru.user_id
              WHERE c.post_type = ? AND c.post_id = ?
              ORDER BY c.created_at ASC`,
             [postType, postId]
         );
-        res.json(comments);
+        res.json(threadComments(rows));
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error.' });
     }
 };
 
-// Post a comment as "Admin" on any post
+// Reorder a flat, created_at-sorted comment list so every reply sits
+// immediately after the top-level comment it belongs to (mirrors the same
+// helper in commentController.js, kept local here to avoid a cross-import).
+function threadComments(rows) {
+    const repliesByParent = {};
+    const topLevel = [];
+
+    rows.forEach(r => {
+        if (r.parent_comment_id) {
+            if (!repliesByParent[r.parent_comment_id]) repliesByParent[r.parent_comment_id] = [];
+            repliesByParent[r.parent_comment_id].push(r);
+        } else {
+            topLevel.push(r);
+        }
+    });
+
+    const threaded = [];
+    topLevel.forEach(c => {
+        threaded.push(c);
+        (repliesByParent[c.comment_id] || []).forEach(r => threaded.push(r));
+    });
+    return threaded;
+}
+
+// Post a comment as "Admin" on any post - optionally a reply to another comment
 exports.addAdminComment = async (req, res) => {
     try {
-        const { post_type, post_id, comment_text } = req.body;
+        const { post_type, post_id, comment_text, parent_comment_id } = req.body;
 
         if (!post_type || !post_id || !comment_text || !comment_text.trim()) {
             return res.status(400).json({ message: 'post_type, post_id, and comment_text are required.' });
@@ -280,11 +309,23 @@ exports.addAdminComment = async (req, res) => {
             return res.status(400).json({ message: 'Invalid post_type.' });
         }
 
+        let parentId = null;
+        if (parent_comment_id) {
+            const [parentRows] = await db.query(
+                'SELECT comment_id FROM comments WHERE comment_id = ? AND post_type = ? AND post_id = ?',
+                [parent_comment_id, post_type, post_id]
+            );
+            if (parentRows.length === 0) {
+                return res.status(400).json({ message: 'The comment you are replying to no longer exists.' });
+            }
+            parentId = parent_comment_id;
+        }
+
         const adminUserId = await getOrCreateAdminUserId();
 
         const [result] = await db.query(
-            'INSERT INTO comments (post_type, post_id, user_id, comment_text) VALUES (?, ?, ?, ?)',
-            [post_type, post_id, adminUserId, comment_text.trim()]
+            'INSERT INTO comments (post_type, post_id, user_id, comment_text, parent_comment_id) VALUES (?, ?, ?, ?, ?)',
+            [post_type, post_id, adminUserId, comment_text.trim(), parentId]
         );
 
         res.status(201).json({ message: 'Comment added as Admin.', comment_id: result.insertId });

@@ -532,9 +532,15 @@ async function loadPostDetailComments() {
     const section = document.getElementById('commentsSection');
     if (!section) return;
 
+    adminReplyingTo = null;
+
     section.innerHTML = `
         <h3><i class="fas fa-comments"></i> Comments</h3>
         <div id="postCommentsList" class="no-comments">Loading comments...</div>
+        <div id="adminReplyingBanner" class="replying-banner">
+            <span id="adminReplyingBannerText"></span>
+            <button onclick="cancelAdminReply()" title="Cancel reply"><i class="fas fa-times"></i></button>
+        </div>
         <div class="admin-comment-box">
             <input type="text" id="adminCommentText" placeholder="Comment as Admin...">
             <button onclick="submitAdminComment()"><i class="fas fa-paper-plane"></i></button>
@@ -553,16 +559,21 @@ async function loadPostDetailComments() {
         listEl.className = '';
         listEl.innerHTML = comments.map(c => {
             const isAdmin = c.name === 'Admin';
+            const isReply = !!c.parent_comment_id;
             const avatar = c.profile_picture
                 ? `<img src="${c.profile_picture}" alt="${c.name}">`
                 : c.name.charAt(0).toUpperCase();
             return `
-                <div class="comment-item">
+                <div class="comment-item${isReply ? ' is-reply' : ''}">
                     <div class="comment-avatar ${isAdmin ? 'admin-avatar' : ''}">${isAdmin ? '<i class="fas fa-user-shield"></i>' : avatar}</div>
                     <div class="comment-body">
+                        ${isReply ? `<div class="reply-to-tag"><i class="fas fa-reply"></i> Replying to ${c.reply_to_name || 'comment'}</div>` : ''}
                         <span class="comment-author ${isAdmin ? 'is-admin' : ''}">${c.name}</span>
                         <span class="comment-time">${timeAgoAdmin(c.created_at)}</span>
                         <div class="comment-text">${c.comment_text}</div>
+                        <div class="comment-actions-row">
+                            ${!isReply ? `<button class="comment-reply-btn" onclick="startAdminReply(${c.comment_id}, '${c.name.replace(/'/g, "\\'")}')"><i class="fas fa-reply"></i> Reply</button>` : ''}
+                        </div>
                     </div>
                 </div>
             `;
@@ -571,6 +582,22 @@ async function loadPostDetailComments() {
         const listEl = document.getElementById('postCommentsList');
         if (listEl) listEl.innerHTML = 'Could not load comments.';
     }
+}
+
+let adminReplyingTo = null; // { comment_id, name } or null
+
+function startAdminReply(comment_id, name) {
+    adminReplyingTo = { comment_id, name };
+    const banner = document.getElementById('adminReplyingBanner');
+    document.getElementById('adminReplyingBannerText').innerText = `Replying to ${name}`;
+    banner.classList.add('active');
+    document.getElementById('adminCommentText').focus();
+}
+
+function cancelAdminReply() {
+    adminReplyingTo = null;
+    const banner = document.getElementById('adminReplyingBanner');
+    if (banner) banner.classList.remove('active');
 }
 
 async function submitAdminComment() {
@@ -584,8 +611,12 @@ async function submitAdminComment() {
     const postId = kind === 'blood' ? p.request_id : p.item_id;
 
     try {
-        await adminApiCall('/admin/comments', 'POST', { post_type: postType, post_id: postId, comment_text: text });
+        const body = { post_type: postType, post_id: postId, comment_text: text };
+        if (adminReplyingTo) body.parent_comment_id = adminReplyingTo.comment_id;
+
+        await adminApiCall('/admin/comments', 'POST', body);
         textEl.value = '';
+        cancelAdminReply();
         loadPostDetailComments();
     } catch (err) {
         alert('Error posting comment: ' + err.message);

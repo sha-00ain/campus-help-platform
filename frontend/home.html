@@ -363,6 +363,38 @@
     }
     .comment-delete-btn:hover { color: #d32f2f; }
     .no-comments { color: #9aa7b8; font-size: 0.85rem; text-align: center; padding: 1rem 0; }
+
+    /* Replies: indented + a left accent bar so it's visually clear which
+       top-level comment a reply belongs to */
+    .comment-item.is-reply {
+      margin-left: 2.6rem;
+      padding-left: 0.8rem;
+      border-left: 2.5px solid var(--primary-soft);
+      background: #fafcff;
+      border-radius: 0 12px 12px 0;
+      margin-top: 2px;
+    }
+    .comment-item.is-reply .comment-avatar { width: 26px; height: 26px; font-size: 0.7rem; }
+    .reply-to-tag {
+      font-size: 0.72rem; color: var(--primary); font-weight: 600;
+      margin-bottom: 2px; display: flex; align-items: center; gap: 4px;
+    }
+    .comment-actions-row { display: flex; gap: 0.9rem; align-items: center; margin-top: 3px; }
+    .comment-reply-btn {
+      background: none; border: none; color: var(--primary); cursor: pointer;
+      font-size: 0.78rem; font-weight: 700; padding: 0; font-family: 'Inter', sans-serif;
+    }
+    .comment-reply-btn:hover { text-decoration: underline; }
+    .replying-banner {
+      display: none; align-items: center; justify-content: space-between;
+      background: var(--primary-soft); color: var(--primary); font-size: 0.8rem; font-weight: 600;
+      padding: 0.5rem 0.8rem; border-radius: 10px; margin-bottom: 0.5rem;
+    }
+    .replying-banner.active { display: flex; }
+    .replying-banner button {
+      background: none; border: none; color: var(--primary); cursor: pointer;
+      font-size: 1rem; padding: 0; margin: 0; box-shadow: none;
+    }
     .feed-post { cursor: pointer; transition: 0.15s; }
     .feed-post:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
 
@@ -709,6 +741,10 @@
       <h3 style="font-size:1.05rem; margin-bottom:0.8rem;"><i class="fas fa-comments"></i> Comments</h3>
       <div id="detailComments" style="margin-bottom:1rem;"></div>
 
+      <div id="replyingBanner" class="replying-banner">
+        <span id="replyingBannerText"></span>
+        <button onclick="cancelReply()" title="Cancel reply"><i class="fas fa-times"></i></button>
+      </div>
       <div style="display:flex; gap:0.6rem; align-items:flex-start;">
         <textarea id="newCommentText" placeholder="Write a comment..." rows="2" style="flex:1;"></textarea>
         <button onclick="submitComment()" style="margin-top:0; white-space:nowrap;"><i class="fas fa-paper-plane"></i> Post</button>
