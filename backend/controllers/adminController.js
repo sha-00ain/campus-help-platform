@@ -2,8 +2,33 @@
 // Admin Controller
 // ===================================================
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const db = require('../config/db');
 require('dotenv').config();
+
+// A fixed, reserved marker email used to represent the admin as a "user" row
+// so that comments the admin posts can be stored/joined like any other comment
+// and shown to everyone as posted by "Admin". This account is set inactive
+// (is_active = FALSE) so it can never be used to log in through the normal
+// student login, even if someone guessed its randomly-generated password.
+const ADMIN_MARKER_EMAIL = 'system.admin@hamdarduniversity.edu.bd';
+
+async function getOrCreateAdminUserId() {
+    const [rows] = await db.query('SELECT user_id FROM users WHERE email = ?', [ADMIN_MARKER_EMAIL]);
+    if (rows.length > 0) {
+        return rows[0].user_id;
+    }
+
+    const randomPassword = crypto.randomBytes(32).toString('hex');
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    const [result] = await db.query(
+        `INSERT INTO users (name, email, password_hash, role, is_active) VALUES (?, ?, ?, 'admin', FALSE)`,
+        ['Admin', ADMIN_MARKER_EMAIL, hashedPassword]
+    );
+    return result.insertId;
+}
 
 // ===== ADMIN LOGIN =====
 // Admin credentials are stored as environment variables, not in the users table,
@@ -36,11 +61,17 @@ exports.login = async (req, res) => {
 // ===== DASHBOARD STATS =====
 exports.getStats = async (req, res) => {
     try {
-        const [[{ total_users }]] = await db.query('SELECT COUNT(*) AS total_users FROM users');
+        // Exclude the hidden "Admin" marker account from every count so it never
+        // inflates the numbers or looks like a real blocked user.
+        const [[{ total_users }]] = await db.query(
+            'SELECT COUNT(*) AS total_users FROM users WHERE email != ?', [ADMIN_MARKER_EMAIL]
+        );
         const [[{ total_blood }]] = await db.query('SELECT COUNT(*) AS total_blood FROM blood_requests');
         const [[{ total_items }]] = await db.query('SELECT COUNT(*) AS total_items FROM items');
         const [[{ total_comments }]] = await db.query('SELECT COUNT(*) AS total_comments FROM comments');
-        const [[{ blocked_users }]] = await db.query('SELECT COUNT(*) AS blocked_users FROM users WHERE is_active = FALSE');
+        const [[{ blocked_users }]] = await db.query(
+            'SELECT COUNT(*) AS blocked_users FROM users WHERE is_active = FALSE AND email != ?', [ADMIN_MARKER_EMAIL]
+        );
 
         res.json({ total_users, total_blood, total_items, total_comments, blocked_users });
     } catch (err) {
@@ -52,9 +83,12 @@ exports.getStats = async (req, res) => {
 // ===== USER MANAGEMENT =====
 exports.getAllUsers = async (req, res) => {
     try {
+        // Exclude the hidden "Admin" marker account - it should never show up in
+        // the users list (deleting it would wipe out every admin-posted comment).
         const [users] = await db.query(
             `SELECT user_id, name, email, student_id, phone, blood_group, department, role, is_active, created_at
-             FROM users ORDER BY created_at DESC`
+             FROM users WHERE email != ? ORDER BY created_at DESC`,
+            [ADMIN_MARKER_EMAIL]
         );
         res.json(users);
     } catch (err) {
@@ -68,6 +102,11 @@ exports.setUserBlockStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { is_active } = req.body; // true = unblock/active, false = block
+
+        const [rows] = await db.query('SELECT email FROM users WHERE user_id = ?', [id]);
+        if (rows.length > 0 && rows[0].email === ADMIN_MARKER_EMAIL) {
+            return res.status(400).json({ message: 'This account cannot be modified.' });
+        }
 
         await db.query('UPDATE users SET is_active = ? WHERE user_id = ?', [is_active, id]);
         res.json({ message: is_active ? 'User unblocked.' : 'User blocked.' });
@@ -83,9 +122,12 @@ exports.deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const [rows] = await db.query('SELECT user_id, role FROM users WHERE user_id = ?', [id]);
+        const [rows] = await db.query('SELECT user_id, email FROM users WHERE user_id = ?', [id]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found.' });
+        }
+        if (rows[0].email === ADMIN_MARKER_EMAIL) {
+            return res.status(400).json({ message: 'This account cannot be deleted.' });
         }
 
         await db.query('DELETE FROM users WHERE user_id = ?', [id]);
@@ -177,6 +219,75 @@ exports.updateAnyItem = async (req, res) => {
             [item_type, category, title, description, location, date_occurred, status, id]
         );
         res.json({ message: 'Item updated by admin.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
+// ===== COMMENT MODERATION (admin can see every comment across all posts) =====
+exports.getAllComments = async (req, res) => {
+    try {
+        const [comments] = await db.query(
+            `SELECT c.comment_id, c.comment_text, c.created_at, c.post_type, c.post_id,
+                    u.name AS commenter_name, u.email AS commenter_email,
+                    CASE
+                        WHEN c.post_type = 'blood' THEN br.blood_group_needed
+                        ELSE i.title
+                    END AS post_title
+             FROM comments c
+             JOIN users u ON c.user_id = u.user_id
+             LEFT JOIN blood_requests br ON c.post_type = 'blood' AND c.post_id = br.request_id
+             LEFT JOIN items i ON c.post_type = 'item' AND c.post_id = i.item_id
+             ORDER BY c.created_at DESC`
+        );
+        res.json(comments);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
+// Get all comments for one specific post (admin view, works for any post)
+exports.getCommentsForPost = async (req, res) => {
+    try {
+        const { postType, postId } = req.params;
+
+        const [comments] = await db.query(
+            `SELECT c.comment_id, c.comment_text, c.created_at, u.user_id, u.name, u.profile_picture
+             FROM comments c
+             JOIN users u ON c.user_id = u.user_id
+             WHERE c.post_type = ? AND c.post_id = ?
+             ORDER BY c.created_at ASC`,
+            [postType, postId]
+        );
+        res.json(comments);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error.' });
+    }
+};
+
+// Post a comment as "Admin" on any post
+exports.addAdminComment = async (req, res) => {
+    try {
+        const { post_type, post_id, comment_text } = req.body;
+
+        if (!post_type || !post_id || !comment_text || !comment_text.trim()) {
+            return res.status(400).json({ message: 'post_type, post_id, and comment_text are required.' });
+        }
+        if (!['blood', 'item'].includes(post_type)) {
+            return res.status(400).json({ message: 'Invalid post_type.' });
+        }
+
+        const adminUserId = await getOrCreateAdminUserId();
+
+        const [result] = await db.query(
+            'INSERT INTO comments (post_type, post_id, user_id, comment_text) VALUES (?, ?, ?, ?)',
+            [post_type, post_id, adminUserId, comment_text.trim()]
+        );
+
+        res.status(201).json({ message: 'Comment added as Admin.', comment_id: result.insertId });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error.' });

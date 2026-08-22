@@ -20,4 +20,8 @@ router.get('/items', verifyAdmin, adminController.getAllItems);
 router.put('/items/:id', verifyAdmin, adminController.updateAnyItem);
 router.delete('/items/:id', verifyAdmin, adminController.deleteAnyItem);
 
+router.get('/comments', verifyAdmin, adminController.getAllComments);
+router.get('/comments/:postType/:postId', verifyAdmin, adminController.getCommentsForPost);
+router.post('/comments', verifyAdmin, adminController.addAdminComment);
+
 module.exports = router;
