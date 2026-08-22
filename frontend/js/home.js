@@ -89,7 +89,7 @@ function renderFeedPage(page) {
                     <h4>${post.blood_group_needed} needed
                         <span class="urgency-tag ${post.urgency_level}">${post.urgency_level}</span>
                     </h4>
-                    ${post.image ? `<img src="${post.image}" style="max-width:250px; border-radius:12px; margin:8px 0;">` : ''}
+                    ${post.image ? `<img src="${post.image}" class="feed-post-img">` : ''}
                     <p><b>Patient:</b> ${post.patient_name || 'N/A'}</p>
                     <p><b>Location:</b> ${post.hospital_location}</p>
                     <div class="feed-meta">Posted by ${post.requester_name} · <i class="fas fa-comment"></i> Tap to view & comment</div>
@@ -103,7 +103,7 @@ function renderFeedPage(page) {
                         <span class="feed-post-time">${timeAgo(post.created_at)}</span>
                     </div>
                     <h4>${post.title}</h4>
-                    ${post.image ? `<img src="${post.image}" style="max-width:250px; border-radius:12px; margin:8px 0;">` : ''}
+                    ${post.image ? `<img src="${post.image}" class="feed-post-img">` : ''}
                     <p>${post.description || ''}</p>
                     <p><b>Location:</b> ${post.location || 'N/A'}</p>
                     <div class="feed-meta">Posted by ${post.posted_by_name} · <i class="fas fa-comment"></i> Tap to view & comment</div>
