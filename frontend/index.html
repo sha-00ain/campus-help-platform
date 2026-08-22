@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- If already logged in (localStorage is shared across every tab of this
+       site), skip this landing page and go straight to the home feed. This
+       runs before anything renders so there's no flash of the logged-out page. -->
+  <script>
+    (function() {
+      if (localStorage.getItem('token')) {
+        window.location.replace('home.html');
+      }
+    })();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>Campus Help · Smart header</title>
