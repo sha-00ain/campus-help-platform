@@ -36,6 +36,10 @@ body {
   box-shadow: var(--shadow-sm);
   z-index: 1000;
   height: var(--topbar-height);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.topbar.header-hidden {
+  transform: translateY(-100%);
 }
 .logo-area {
   display: flex; align-items: center; gap: 0.6rem;
@@ -60,9 +64,9 @@ body {
   background: transparent; border: 1.5px solid #fee2e2; color: #dc2626;
   padding: 0.5rem 1.2rem; border-radius: 30px; font-weight: 600; font-size: 0.95rem;
   cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', sans-serif; margin-top: 0; box-shadow: none;
 }
-.nav-links .logout-btn:hover { background: #fee2e2; border-color: #dc2626; }
+.nav-links .logout-btn:hover { background: #fee2e2; border-color: #dc2626; transform: none; }
 
 /* Container & cards */
 .container { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem; }

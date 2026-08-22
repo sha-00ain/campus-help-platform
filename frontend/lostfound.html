@@ -12,7 +12,7 @@
 </head>
 <body>
 
-<header class="topbar">
+<header class="topbar" id="smartHeader">
     <a href="home.html" class="logo-area">
         <span class="logo-icon"><i class="fas fa-graduation-cap"></i></span>
         <span>Campus<span style="color: var(--primary);">Help</span></span>
@@ -161,5 +161,42 @@
 
 <script src="js/api.js"></script>
 <script src="js/lostfound.js"></script>
+<script>
+  // Smart scroll behavior for topbar (same as the home feed page)
+  (function() {
+    const header = document.getElementById('smartHeader');
+    if (!header) return;
+
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    function updateHeader() {
+      const currentScrollY = window.scrollY;
+      const headerHeight = header.offsetHeight;
+
+      if (currentScrollY < lastScrollY || currentScrollY < 10) {
+        header.classList.remove('header-hidden');
+      } else if (currentScrollY > lastScrollY && currentScrollY > headerHeight) {
+        header.classList.add('header-hidden');
+      }
+
+      lastScrollY = currentScrollY;
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', function() {
+      if (!ticking) {
+        window.requestAnimationFrame(updateHeader);
+        ticking = true;
+      }
+    });
+
+    window.addEventListener('load', function() {
+      updateHeader();
+    });
+
+    updateHeader();
+  })();
+</script>
 </body>
 </html>
