@@ -106,6 +106,31 @@
 
 </div>
 
+<!-- Post Detail Modal (view full details + comments) -->
+<div id="postDetailModal" class="modal-overlay" onclick="closePostDetailModalOnOverlay(event)">
+  <div class="modal-box" style="max-width:600px;">
+    <div class="modal-header">
+      <h2 id="detailTitle">Blood Request</h2>
+      <span class="modal-close" onclick="closePostDetailModal()">&times;</span>
+    </div>
+    <div id="detailContent"></div>
+
+    <hr style="border:none; border-top:1px solid var(--border); margin:1.2rem 0;">
+
+    <h3 style="font-size:1.05rem; margin-bottom:0.8rem;"><i class="fas fa-comments"></i> Comments</h3>
+    <div id="detailComments" style="margin-bottom:1rem;"></div>
+
+    <div id="replyingBanner" class="replying-banner">
+      <span id="replyingBannerText"></span>
+      <button onclick="cancelReply()" title="Cancel reply"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="comment-input-box">
+      <input type="text" id="newCommentText" placeholder="Write a comment..." onkeydown="if(event.key==='Enter'){event.preventDefault(); submitComment();}">
+      <button onclick="submitComment()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
 <!-- Edit Blood Request Modal (opens in place, without leaving this page) -->
 <div id="editRequestModal" class="modal-overlay" onclick="closeEditRequestModalOnOverlay(event)">
   <div class="modal-box">

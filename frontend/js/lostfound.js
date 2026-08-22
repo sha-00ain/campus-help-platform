@@ -49,7 +49,7 @@ function renderItemsPage(page) {
     container.innerHTML = pageItems.map(i => {
         const isOwner = currentUser && i.posted_by === currentUser.user_id;
         return `
-            <div class="item-box">
+            <div class="item-box clickable-post" onclick="openPostDetail(${i.item_id})">
                 <h4>${i.title}
                     <span class="tag ${i.item_type === 'found' ? 'found' : ''}">${i.item_type}</span>
                 </h4>
@@ -59,16 +59,150 @@ function renderItemsPage(page) {
                 <p><b>Posted by:</b> ${i.posted_by_name} (${i.posted_by_phone || 'no phone'})</p>
                 ${isOwner
                     ? `<div class="post-actions">
-                         <button class="btn-edit" onclick="editItem(${i.item_id})"><i class="fas fa-pen"></i> Edit</button>
-                         <button class="btn-delete" onclick="deleteItem(${i.item_id})"><i class="fas fa-trash"></i> Delete</button>
+                         <button class="btn-edit" onclick="event.stopPropagation(); editItem(${i.item_id})"><i class="fas fa-pen"></i> Edit</button>
+                         <button class="btn-delete" onclick="event.stopPropagation(); deleteItem(${i.item_id})"><i class="fas fa-trash"></i> Delete</button>
                        </div>`
-                    : `<button onclick="claimItem(${i.item_id})">This is Mine / Claim</button>`
+                    : `<button onclick="event.stopPropagation(); claimItem(${i.item_id})">This is Mine / Claim</button>`
                 }
             </div>
         `;
     }).join('');
 
     renderPagination('itemsPagination', allItems.length, ITEMS_PAGE_SIZE, page, 'renderItemsPage');
+}
+
+// ===== Post Detail Modal (view full details + comments) =====
+let currentDetailItem = null;
+
+function openPostDetail(item_id) {
+    const i = allItems.find(it => it.item_id === item_id);
+    if (!i) return;
+    currentDetailItem = i;
+    cancelReply();
+
+    const isOwner = currentUser && i.posted_by === currentUser.user_id;
+    document.getElementById('detailTitle').innerText = `${i.item_type === 'found' ? '✅ Found' : '🎒 Lost'}: ${i.title}`;
+    document.getElementById('detailContent').innerHTML = `
+        <span class="tag ${i.item_type === 'found' ? 'found' : ''}">${i.item_type}</span>
+        ${i.image ? `<img src="${i.image}" style="max-width:100%; border-radius:12px; margin:10px 0;">` : ''}
+        <p>${i.description || ''}</p>
+        <p><b>Category:</b> ${i.category || 'N/A'} | <b>Location:</b> ${i.location || 'N/A'}</p>
+        <p style="color:var(--text-muted); font-size:0.85rem;">Posted by ${i.posted_by_name} (${i.posted_by_phone || 'no phone'})</p>
+        <div style="display:flex; gap:0.6rem; margin-top:1rem; flex-wrap:wrap;">
+            ${!isOwner ? `<button onclick="claimItem(${i.item_id}); closePostDetailModal();">This is Mine / Claim</button>` : ''}
+            ${isOwner ? `<button class="btn-edit" onclick="closePostDetailModal(); editItem(${i.item_id});"><i class="fas fa-pen"></i> Edit</button>
+                         <button class="btn-delete" onclick="closePostDetailModal(); deleteItem(${i.item_id});"><i class="fas fa-trash"></i> Delete</button>` : ''}
+        </div>
+    `;
+
+    document.getElementById('postDetailModal').classList.add('active');
+    loadDetailComments();
+}
+
+function closePostDetailModal() {
+    document.getElementById('postDetailModal').classList.remove('active');
+    currentDetailItem = null;
+    cancelReply();
+}
+
+function closePostDetailModalOnOverlay(event) {
+    if (event.target.id === 'postDetailModal') closePostDetailModal();
+}
+
+// ===== Comments =====
+let replyingTo = null; // { comment_id, name } or null
+
+async function loadDetailComments() {
+    if (!currentDetailItem) return;
+    const postId = currentDetailItem.item_id;
+    const container = document.getElementById('detailComments');
+    container.innerHTML = '<p class="no-comments">Loading comments...</p>';
+
+    try {
+        const comments = await apiCall(`/comments/item/${postId}`, 'GET');
+        if (comments.length === 0) {
+            container.innerHTML = '<p class="no-comments">No comments yet. Be the first to comment!</p>';
+            return;
+        }
+        container.innerHTML = comments.map(c => {
+            const isMine = currentUser && c.user_id === currentUser.user_id;
+            const isReply = !!c.parent_comment_id;
+            const avatar = c.profile_picture
+                ? `<img src="${c.profile_picture}" alt="${c.name}">`
+                : c.name.charAt(0).toUpperCase();
+
+            let replyLine = '';
+            if (isReply) {
+                const replyAuthorIsMe = currentUser && c.user_id === currentUser.user_id;
+                const parentIsMe = currentUser && c.reply_to_user_id === currentUser.user_id;
+                const replyAuthorName = replyAuthorIsMe ? 'You' : c.name;
+                const parentName = parentIsMe ? 'you' : (c.reply_to_name || 'a comment');
+                replyLine = `${replyAuthorName} replied to ${parentName}`;
+            }
+
+            return `
+            <div class="comment-item${isReply ? ' is-reply' : ''}">
+                <div class="comment-avatar">${avatar}</div>
+                <div class="comment-body">
+                    ${isReply
+                        ? `<div class="reply-to-tag"><i class="fas fa-reply"></i> ${replyLine}</div>`
+                        : `<span class="comment-author">${c.name}</span>`}
+                    <span class="comment-time">${timeAgo(c.created_at)}</span>
+                    <div class="comment-text">${c.comment_text}</div>
+                    <div class="comment-actions-row">
+                        ${!isReply ? `<button class="comment-reply-btn" onclick="startReply(${c.comment_id}, '${c.name.replace(/'/g, "\\'")}')"><i class="fas fa-reply"></i> Reply</button>` : ''}
+                    </div>
+                </div>
+                ${isMine ? `<button class="comment-delete-btn" onclick="deleteComment(${c.comment_id})" title="Delete comment"><i class="fas fa-trash"></i></button>` : ''}
+            </div>
+            `;
+        }).join('');
+    } catch (err) {
+        container.innerHTML = `<p class="no-comments">Could not load comments.</p>`;
+    }
+}
+
+function startReply(comment_id, name) {
+    replyingTo = { comment_id, name };
+    const banner = document.getElementById('replyingBanner');
+    document.getElementById('replyingBannerText').innerText = `Replying to ${name}`;
+    banner.classList.add('active');
+    document.getElementById('newCommentText').focus();
+}
+
+function cancelReply() {
+    replyingTo = null;
+    const banner = document.getElementById('replyingBanner');
+    if (banner) banner.classList.remove('active');
+}
+
+async function submitComment() {
+    if (!currentDetailItem) return;
+    const textEl = document.getElementById('newCommentText');
+    const text = textEl.value.trim();
+    if (!text) return;
+
+    try {
+        const body = { post_type: 'item', post_id: currentDetailItem.item_id, comment_text: text };
+        if (replyingTo) body.parent_comment_id = replyingTo.comment_id;
+
+        await apiCall('/comments', 'POST', body);
+        textEl.value = '';
+        cancelReply();
+        loadDetailComments();
+    } catch (err) {
+        alert('Error posting comment: ' + err.message);
+    }
+}
+
+async function deleteComment(comment_id) {
+    if (!confirm('Delete this comment?')) return;
+    try {
+        await apiCall(`/comments/${comment_id}`, 'DELETE');
+        loadDetailComments();
+    } catch (err) {
+        alert('Error deleting comment: ' + err.message);
+    }
 }
 
 // Claim an item
@@ -147,9 +281,12 @@ document.getElementById('editItemForm').addEventListener('submit', async (e) => 
     }
 });
 
-// Close the edit modal with Escape key
+// Close modals with Escape key
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeEditItemModal();
+    if (e.key === 'Escape') {
+        closeEditItemModal();
+        closePostDetailModal();
+    }
 });
 
 // ===== Delete an item =====

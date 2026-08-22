@@ -34,6 +34,20 @@ function wakeServer() {
     fetch(rootUrl).catch(() => {});
 }
 
+// Turn a MySQL datetime into a friendly "time ago" string (shared by any
+// page that shows timestamps - feed posts, comments, etc.)
+function timeAgo(dateStr) {
+    const then = new Date(dateStr.replace(' ', 'T'));
+    const seconds = Math.floor((new Date() - then) / 1000);
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+}
+
 // Convert a selected <input type="file"> image into a base64 string (or null if none chosen)
 function fileToBase64(inputElement) {
     return new Promise((resolve, reject) => {

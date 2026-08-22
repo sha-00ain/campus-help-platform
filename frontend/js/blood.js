@@ -42,7 +42,7 @@ function renderRequestsPage(page) {
     container.innerHTML = pageItems.map(r => {
         const isOwner = currentUser && r.requester_id === currentUser.user_id;
         return `
-            <div class="item-box">
+            <div class="item-box clickable-post" onclick="openPostDetail(${r.request_id})">
                 <h4>${r.blood_group_needed} needed
                     <span class="tag ${r.urgency_level}">${r.urgency_level}</span>
                 </h4>
@@ -53,16 +53,151 @@ function renderRequestsPage(page) {
                 <p><b>Posted by:</b> ${r.requester_name} (${r.requester_phone || 'no phone'})</p>
                 ${isOwner
                     ? `<div class="post-actions">
-                         <button class="btn-edit" onclick="editRequest(${r.request_id})"><i class="fas fa-pen"></i> Edit</button>
-                         <button class="btn-delete" onclick="deleteRequest(${r.request_id})"><i class="fas fa-trash"></i> Delete</button>
+                         <button class="btn-edit" onclick="event.stopPropagation(); editRequest(${r.request_id})"><i class="fas fa-pen"></i> Edit</button>
+                         <button class="btn-delete" onclick="event.stopPropagation(); deleteRequest(${r.request_id})"><i class="fas fa-trash"></i> Delete</button>
                        </div>`
-                    : `<button onclick="respondToRequest(${r.request_id})">I Can Donate</button>`
+                    : `<button onclick="event.stopPropagation(); respondToRequest(${r.request_id})">I Can Donate</button>`
                 }
             </div>
         `;
     }).join('');
 
     renderPagination('requestsPagination', allRequests.length, REQUESTS_PAGE_SIZE, page, 'renderRequestsPage');
+}
+
+// ===== Post Detail Modal (view full details + comments) =====
+let currentDetailRequest = null;
+
+function openPostDetail(request_id) {
+    const r = allRequests.find(req => req.request_id === request_id);
+    if (!r) return;
+    currentDetailRequest = r;
+    cancelReply();
+
+    const isOwner = currentUser && r.requester_id === currentUser.user_id;
+    document.getElementById('detailTitle').innerText = `🩸 ${r.blood_group_needed} needed`;
+    document.getElementById('detailContent').innerHTML = `
+        <span class="tag ${r.urgency_level}">${r.urgency_level}</span>
+        ${r.image ? `<img src="${r.image}" style="max-width:100%; border-radius:12px; margin:10px 0;">` : ''}
+        <p><b>Patient:</b> ${r.patient_name || 'N/A'}</p>
+        <p><b>Location:</b> ${r.hospital_location}</p>
+        <p><b>Units needed:</b> ${r.units_needed}</p>
+        <p style="color:var(--text-muted); font-size:0.85rem;">Posted by ${r.requester_name} (${r.requester_phone || 'no phone'})</p>
+        <div style="display:flex; gap:0.6rem; margin-top:1rem; flex-wrap:wrap;">
+            ${!isOwner ? `<button onclick="respondToRequest(${r.request_id}); closePostDetailModal();">I Can Donate</button>` : ''}
+            ${isOwner ? `<button class="btn-edit" onclick="closePostDetailModal(); editRequest(${r.request_id});"><i class="fas fa-pen"></i> Edit</button>
+                         <button class="btn-delete" onclick="closePostDetailModal(); deleteRequest(${r.request_id});"><i class="fas fa-trash"></i> Delete</button>` : ''}
+        </div>
+    `;
+
+    document.getElementById('postDetailModal').classList.add('active');
+    loadDetailComments();
+}
+
+function closePostDetailModal() {
+    document.getElementById('postDetailModal').classList.remove('active');
+    currentDetailRequest = null;
+    cancelReply();
+}
+
+function closePostDetailModalOnOverlay(event) {
+    if (event.target.id === 'postDetailModal') closePostDetailModal();
+}
+
+// ===== Comments =====
+let replyingTo = null; // { comment_id, name } or null
+
+async function loadDetailComments() {
+    if (!currentDetailRequest) return;
+    const postId = currentDetailRequest.request_id;
+    const container = document.getElementById('detailComments');
+    container.innerHTML = '<p class="no-comments">Loading comments...</p>';
+
+    try {
+        const comments = await apiCall(`/comments/blood/${postId}`, 'GET');
+        if (comments.length === 0) {
+            container.innerHTML = '<p class="no-comments">No comments yet. Be the first to comment!</p>';
+            return;
+        }
+        container.innerHTML = comments.map(c => {
+            const isMine = currentUser && c.user_id === currentUser.user_id;
+            const isReply = !!c.parent_comment_id;
+            const avatar = c.profile_picture
+                ? `<img src="${c.profile_picture}" alt="${c.name}">`
+                : c.name.charAt(0).toUpperCase();
+
+            let replyLine = '';
+            if (isReply) {
+                const replyAuthorIsMe = currentUser && c.user_id === currentUser.user_id;
+                const parentIsMe = currentUser && c.reply_to_user_id === currentUser.user_id;
+                const replyAuthorName = replyAuthorIsMe ? 'You' : c.name;
+                const parentName = parentIsMe ? 'you' : (c.reply_to_name || 'a comment');
+                replyLine = `${replyAuthorName} replied to ${parentName}`;
+            }
+
+            return `
+            <div class="comment-item${isReply ? ' is-reply' : ''}">
+                <div class="comment-avatar">${avatar}</div>
+                <div class="comment-body">
+                    ${isReply
+                        ? `<div class="reply-to-tag"><i class="fas fa-reply"></i> ${replyLine}</div>`
+                        : `<span class="comment-author">${c.name}</span>`}
+                    <span class="comment-time">${timeAgo(c.created_at)}</span>
+                    <div class="comment-text">${c.comment_text}</div>
+                    <div class="comment-actions-row">
+                        ${!isReply ? `<button class="comment-reply-btn" onclick="startReply(${c.comment_id}, '${c.name.replace(/'/g, "\\'")}')"><i class="fas fa-reply"></i> Reply</button>` : ''}
+                    </div>
+                </div>
+                ${isMine ? `<button class="comment-delete-btn" onclick="deleteComment(${c.comment_id})" title="Delete comment"><i class="fas fa-trash"></i></button>` : ''}
+            </div>
+            `;
+        }).join('');
+    } catch (err) {
+        container.innerHTML = `<p class="no-comments">Could not load comments.</p>`;
+    }
+}
+
+function startReply(comment_id, name) {
+    replyingTo = { comment_id, name };
+    const banner = document.getElementById('replyingBanner');
+    document.getElementById('replyingBannerText').innerText = `Replying to ${name}`;
+    banner.classList.add('active');
+    document.getElementById('newCommentText').focus();
+}
+
+function cancelReply() {
+    replyingTo = null;
+    const banner = document.getElementById('replyingBanner');
+    if (banner) banner.classList.remove('active');
+}
+
+async function submitComment() {
+    if (!currentDetailRequest) return;
+    const textEl = document.getElementById('newCommentText');
+    const text = textEl.value.trim();
+    if (!text) return;
+
+    try {
+        const body = { post_type: 'blood', post_id: currentDetailRequest.request_id, comment_text: text };
+        if (replyingTo) body.parent_comment_id = replyingTo.comment_id;
+
+        await apiCall('/comments', 'POST', body);
+        textEl.value = '';
+        cancelReply();
+        loadDetailComments();
+    } catch (err) {
+        alert('Error posting comment: ' + err.message);
+    }
+}
+
+async function deleteComment(comment_id) {
+    if (!confirm('Delete this comment?')) return;
+    try {
+        await apiCall(`/comments/${comment_id}`, 'DELETE');
+        loadDetailComments();
+    } catch (err) {
+        alert('Error deleting comment: ' + err.message);
+    }
 }
 
 // Respond to a request (offer to donate)
@@ -137,9 +272,12 @@ document.getElementById('editRequestForm').addEventListener('submit', async (e) 
     }
 });
 
-// Close the edit modal with Escape key
+// Close modals with Escape key
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeEditRequestModal();
+    if (e.key === 'Escape') {
+        closeEditRequestModal();
+        closePostDetailModal();
+    }
 });
 
 // ===== Delete a request =====
