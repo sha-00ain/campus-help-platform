@@ -599,7 +599,10 @@
     }
 
     .post-detail-view p { margin: 6px 0; font-size: 0.95rem; }
-    .post-detail-view img { max-width: 100%; border-radius: 12px; margin: 10px 0; }
+    .post-detail-view img {
+      display: block; width: 100%; max-width: 260px; aspect-ratio: 1 / 1;
+      object-fit: cover; border-radius: 12px; margin: 10px auto;
+    }
     .post-detail-actions { display: flex; gap: 0.6rem; margin-top: 1.5rem; flex-wrap: wrap; }
 
     .btn-danger {

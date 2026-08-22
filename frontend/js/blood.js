@@ -46,7 +46,7 @@ function renderRequestsPage(page) {
                 <h4>${r.blood_group_needed} needed
                     <span class="tag ${r.urgency_level}">${r.urgency_level}</span>
                 </h4>
-                ${r.image ? `<img src="${r.image}" style="max-width:200px; border-radius:8px; margin:8px 0;">` : ''}
+                ${r.image ? `<img src="${r.image}" class="post-thumb-img">` : ''}
                 <p><b>Patient:</b> ${r.patient_name || 'N/A'}</p>
                 <p><b>Location:</b> ${r.hospital_location}</p>
                 <p><b>Units needed:</b> ${r.units_needed}</p>
@@ -78,7 +78,7 @@ function openPostDetail(request_id) {
     document.getElementById('detailTitle').innerText = `🩸 ${r.blood_group_needed} needed`;
     document.getElementById('detailContent').innerHTML = `
         <span class="tag ${r.urgency_level}">${r.urgency_level}</span>
-        ${r.image ? `<img src="${r.image}" style="max-width:100%; border-radius:12px; margin:10px 0;">` : ''}
+        ${r.image ? `<img src="${r.image}" class="post-detail-img">` : ''}
         <p><b>Patient:</b> ${r.patient_name || 'N/A'}</p>
         <p><b>Location:</b> ${r.hospital_location}</p>
         <p><b>Units needed:</b> ${r.units_needed}</p>

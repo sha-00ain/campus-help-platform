@@ -124,6 +124,26 @@ button.secondary:hover { background: #e2e8f0; transform: none; }
 .item-box.clickable-post { cursor: pointer; transition: 0.15s; }
 .item-box.clickable-post:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
 
+/* Fixed 1:1 (square) post image - the same shape used for every post image
+   across the whole site (feed, blood, lost&found, detail modals). */
+.post-thumb-img {
+  display: block;
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin: 8px 0;
+}
+.post-detail-img {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 10px auto;
+}
+
 .tag, .urgency-tag {
   display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 3px 10px;
   border-radius: 20px; margin-left: 8px; text-transform: uppercase;

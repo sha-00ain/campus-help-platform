@@ -53,7 +53,7 @@ function renderItemsPage(page) {
                 <h4>${i.title}
                     <span class="tag ${i.item_type === 'found' ? 'found' : ''}">${i.item_type}</span>
                 </h4>
-                ${i.image ? `<img src="${i.image}" style="max-width:200px; border-radius:8px; margin:8px 0;">` : ''}
+                ${i.image ? `<img src="${i.image}" class="post-thumb-img">` : ''}
                 <p>${i.description || ''}</p>
                 <p><b>Category:</b> ${i.category || 'N/A'} | <b>Location:</b> ${i.location || 'N/A'}</p>
                 <p><b>Posted by:</b> ${i.posted_by_name} (${i.posted_by_phone || 'no phone'})</p>
@@ -84,7 +84,7 @@ function openPostDetail(item_id) {
     document.getElementById('detailTitle').innerText = `${i.item_type === 'found' ? '✅ Found' : '🎒 Lost'}: ${i.title}`;
     document.getElementById('detailContent').innerHTML = `
         <span class="tag ${i.item_type === 'found' ? 'found' : ''}">${i.item_type}</span>
-        ${i.image ? `<img src="${i.image}" style="max-width:100%; border-radius:12px; margin:10px 0;">` : ''}
+        ${i.image ? `<img src="${i.image}" class="post-detail-img">` : ''}
         <p>${i.description || ''}</p>
         <p><b>Category:</b> ${i.category || 'N/A'} | <b>Location:</b> ${i.location || 'N/A'}</p>
         <p style="color:var(--text-muted); font-size:0.85rem;">Posted by ${i.posted_by_name} (${i.posted_by_phone || 'no phone'})</p>

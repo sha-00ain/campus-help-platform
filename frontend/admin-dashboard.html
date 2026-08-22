@@ -93,7 +93,10 @@
 
   /* post detail view */
   .post-detail-view p { margin:6px 0; font-size:0.9rem; }
-  .post-detail-view img { max-width:100%; border-radius:12px; margin:8px 0; }
+  .post-detail-view img {
+    display:block; width:100%; max-width:260px; aspect-ratio:1/1;
+    object-fit:cover; border-radius:12px; margin:8px auto;
+  }
 
   /* form for editing a post */
   .form-group { margin-bottom:0.9rem; }

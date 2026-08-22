@@ -89,7 +89,7 @@ function renderFeedPage(page) {
                     <h4>${post.blood_group_needed} needed
                         <span class="urgency-tag ${post.urgency_level}">${post.urgency_level}</span>
                     </h4>
-                    ${post.image ? `<img src="${post.image}" class="feed-post-img">` : ''}
+                    ${post.image ? `<img src="${post.image}" class="post-thumb-img">` : ''}
                     <p><b>Patient:</b> ${post.patient_name || 'N/A'}</p>
                     <p><b>Location:</b> ${post.hospital_location}</p>
                     <div class="feed-meta">Posted by ${post.requester_name} · <i class="fas fa-comment"></i> Tap to view & comment</div>
@@ -103,7 +103,7 @@ function renderFeedPage(page) {
                         <span class="feed-post-time">${timeAgo(post.created_at)}</span>
                     </div>
                     <h4>${post.title}</h4>
-                    ${post.image ? `<img src="${post.image}" class="feed-post-img">` : ''}
+                    ${post.image ? `<img src="${post.image}" class="post-thumb-img">` : ''}
                     <p>${post.description || ''}</p>
                     <p><b>Location:</b> ${post.location || 'N/A'}</p>
                     <div class="feed-meta">Posted by ${post.posted_by_name} · <i class="fas fa-comment"></i> Tap to view & comment</div>
@@ -142,7 +142,7 @@ function renderPostDetailView() {
         const isOwner = getUser() && post.requester_id === getUser().user_id;
         contentEl.innerHTML = `
             <span class="urgency-tag ${post.urgency_level}">${post.urgency_level}</span>
-            ${post.image ? `<img src="${post.image}" style="max-width:100%; border-radius:12px; margin:10px 0;">` : ''}
+            ${post.image ? `<img src="${post.image}" class="post-detail-img">` : ''}
             <p style="margin:4px 0;"><b>Patient:</b> ${post.patient_name || 'N/A'}</p>
             <p style="margin:4px 0;"><b>Location:</b> ${post.hospital_location}</p>
             <p style="margin:4px 0;"><b>Units needed:</b> ${post.units_needed}</p>
@@ -158,7 +158,7 @@ function renderPostDetailView() {
         const isOwner = getUser() && post.posted_by === getUser().user_id;
         contentEl.innerHTML = `
             <span class="tag ${post.item_type === 'found' ? 'found' : ''}">${post.item_type}</span>
-            ${post.image ? `<img src="${post.image}" style="max-width:100%; border-radius:12px; margin:10px 0;">` : ''}
+            ${post.image ? `<img src="${post.image}" class="post-detail-img">` : ''}
             <p style="margin:4px 0;">${post.description || ''}</p>
             <p style="margin:4px 0;"><b>Category:</b> ${post.category || 'N/A'} | <b>Location:</b> ${post.location || 'N/A'}</p>
             <p style="margin:4px 0; color:var(--text-muted); font-size:0.85rem;">Posted by ${post.posted_by_name}</p>
