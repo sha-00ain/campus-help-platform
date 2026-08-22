@@ -411,6 +411,18 @@
       background: none; border: none; color: var(--primary); cursor: pointer;
       font-size: 1rem; padding: 0; margin: 0; box-shadow: none;
     }
+    /* Comment input - same compact "pill" style used everywhere (admin
+       dashboard, home feed) for a consistent commenting experience */
+    .comment-input-box { display: flex; gap: 0.5rem; margin-top: 0.4rem; }
+    .comment-input-box input {
+      flex: 1; padding: 0.65rem 1rem; border: 1.5px solid var(--border); border-radius: 20px;
+      font-size: 0.85rem; font-family: 'Inter', sans-serif;
+    }
+    .comment-input-box input:focus { outline: none; border-color: var(--primary); }
+    .comment-input-box button {
+      background: var(--primary); color: white; border: none; padding: 0 1.2rem; border-radius: 20px;
+      font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; margin-top: 0;
+    }
     .feed-post { cursor: pointer; transition: 0.15s; }
     .feed-post:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
 
@@ -759,9 +771,9 @@
         <span id="replyingBannerText"></span>
         <button onclick="cancelReply()" title="Cancel reply"><i class="fas fa-times"></i></button>
       </div>
-      <div style="display:flex; gap:0.6rem; align-items:flex-start;">
-        <textarea id="newCommentText" placeholder="Write a comment..." rows="2" style="flex:1;"></textarea>
-        <button onclick="submitComment()" style="margin-top:0; white-space:nowrap;"><i class="fas fa-paper-plane"></i> Post</button>
+      <div class="comment-input-box">
+        <input type="text" id="newCommentText" placeholder="Write a comment..." onkeydown="if(event.key==='Enter'){event.preventDefault(); submitComment();}">
+        <button onclick="submitComment()"><i class="fas fa-paper-plane"></i></button>
       </div>
     </div>
   </div>

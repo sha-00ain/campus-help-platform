@@ -52,7 +52,7 @@ exports.getComments = async (req, res) => {
         const [rows] = await db.query(
             `SELECT c.comment_id, c.comment_text, c.created_at, c.parent_comment_id,
                     u.user_id, u.name, u.profile_picture,
-                    ru.name AS reply_to_name
+                    ru.name AS reply_to_name, pc.user_id AS reply_to_user_id
              FROM comments c
              JOIN users u ON c.user_id = u.user_id
              LEFT JOIN comments pc ON c.parent_comment_id = pc.comment_id

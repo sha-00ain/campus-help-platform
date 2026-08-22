@@ -542,7 +542,7 @@ async function loadPostDetailComments() {
             <button onclick="cancelAdminReply()" title="Cancel reply"><i class="fas fa-times"></i></button>
         </div>
         <div class="admin-comment-box">
-            <input type="text" id="adminCommentText" placeholder="Comment as Admin...">
+            <input type="text" id="adminCommentText" placeholder="Comment as Admin..." onkeydown="if(event.key==='Enter'){event.preventDefault(); submitAdminComment();}">
             <button onclick="submitAdminComment()"><i class="fas fa-paper-plane"></i></button>
         </div>
     `;
@@ -563,12 +563,14 @@ async function loadPostDetailComments() {
             const avatar = c.profile_picture
                 ? `<img src="${c.profile_picture}" alt="${c.name}">`
                 : c.name.charAt(0).toUpperCase();
+            const replyLine = isReply ? `${c.name} replied to ${c.reply_to_name || 'a comment'}` : '';
             return `
                 <div class="comment-item${isReply ? ' is-reply' : ''}">
                     <div class="comment-avatar ${isAdmin ? 'admin-avatar' : ''}">${isAdmin ? '<i class="fas fa-user-shield"></i>' : avatar}</div>
                     <div class="comment-body">
-                        ${isReply ? `<div class="reply-to-tag"><i class="fas fa-reply"></i> Replying to ${c.reply_to_name || 'comment'}</div>` : ''}
-                        <span class="comment-author ${isAdmin ? 'is-admin' : ''}">${c.name}</span>
+                        ${isReply
+                            ? `<div class="reply-to-tag"><i class="fas fa-reply"></i> ${replyLine}</div>`
+                            : `<span class="comment-author ${isAdmin ? 'is-admin' : ''}">${c.name}</span>`}
                         <span class="comment-time">${timeAgoAdmin(c.created_at)}</span>
                         <div class="comment-text">${c.comment_text}</div>
                         <div class="comment-actions-row">

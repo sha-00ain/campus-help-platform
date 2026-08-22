@@ -378,12 +378,23 @@ async function loadDetailComments() {
             const avatar = c.profile_picture
                 ? `<img src="${c.profile_picture}" alt="${c.name}">`
                 : c.name.charAt(0).toUpperCase();
+
+            let replyLine = '';
+            if (isReply) {
+                const replyAuthorIsMe = currentUser && c.user_id === currentUser.user_id;
+                const parentIsMe = currentUser && c.reply_to_user_id === currentUser.user_id;
+                const replyAuthorName = replyAuthorIsMe ? 'You' : c.name;
+                const parentName = parentIsMe ? 'you' : (c.reply_to_name || 'a comment');
+                replyLine = `${replyAuthorName} replied to ${parentName}`;
+            }
+
             return `
             <div class="comment-item${isReply ? ' is-reply' : ''}">
                 <div class="comment-avatar">${avatar}</div>
                 <div class="comment-body">
-                    ${isReply ? `<div class="reply-to-tag"><i class="fas fa-reply"></i> Replying to ${c.reply_to_name || 'comment'}</div>` : ''}
-                    <span class="comment-author">${c.name}</span>
+                    ${isReply
+                        ? `<div class="reply-to-tag"><i class="fas fa-reply"></i> ${replyLine}</div>`
+                        : `<span class="comment-author">${c.name}</span>`}
                     <span class="comment-time">${timeAgo(c.created_at)}</span>
                     <div class="comment-text">${c.comment_text}</div>
                     <div class="comment-actions-row">
