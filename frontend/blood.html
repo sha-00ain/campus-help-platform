@@ -19,6 +19,19 @@
     </a>
     <nav class="nav-links">
         <a href="home.html"><i class="fas fa-home"></i> Home</a>
+        <div class="notif-bell-wrap">
+            <button class="notif-bell-btn" id="notifBell" onclick="toggleNotifDropdown()">
+                <i class="fas fa-bell"></i>
+                <span class="notif-badge" id="notifBadge">0</span>
+            </button>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-dropdown-header">
+                    <span>Notifications</span>
+                    <button onclick="markAllNotifsRead()">Mark all read</button>
+                </div>
+                <div id="notifList"></div>
+            </div>
+        </div>
         <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
         <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </nav>
@@ -180,6 +193,7 @@
 </div>
 
 <script src="js/api.js"></script>
+<script src="js/notifications.js"></script>
 <script src="js/blood.js"></script>
 <script>
   // Smart scroll behavior for topbar (same as the home feed page)

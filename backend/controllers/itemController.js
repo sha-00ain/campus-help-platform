@@ -2,6 +2,7 @@
 // Lost & Found Controller
 // ===================================================
 const db = require('../config/db');
+const { notifyAllUsersExcept } = require('../utils/notify');
 
 // Post a new lost or found item
 exports.createItem = async (req, res) => {
@@ -17,6 +18,14 @@ exports.createItem = async (req, res) => {
             `INSERT INTO items (posted_by, item_type, category, title, description, location, date_occurred, image)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [posted_by, item_type, category, title, description, location, date_occurred, image || null]
+        );
+
+        // Let everyone know a new lost/found post went up
+        notifyAllUsersExcept(
+            posted_by,
+            item_type === 'found' ? 'item_found' : 'general',
+            result.insertId,
+            `New ${item_type} item posted: ${title}`
         );
 
         res.status(201).json({ message: 'Item posted successfully!', item_id: result.insertId });

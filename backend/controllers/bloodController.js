@@ -2,6 +2,7 @@
 // Blood Donation Controller
 // ===================================================
 const db = require('../config/db');
+const { notifyAllUsersExcept } = require('../utils/notify');
 
 // Register current logged-in user as a donor
 exports.becomeDonor = async (req, res) => {
@@ -70,6 +71,14 @@ exports.createRequest = async (req, res) => {
             `INSERT INTO blood_requests (requester_id, blood_group_needed, patient_name, hospital_location, units_needed, urgency_level, image)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [requester_id, blood_group_needed, patient_name, hospital_location, units_needed || 1, urgency_level || 'normal', image || null]
+        );
+
+        // Let everyone know a new blood request went up
+        notifyAllUsersExcept(
+            requester_id,
+            'blood_request',
+            result.insertId,
+            `New blood request: ${blood_group_needed} needed at ${hospital_location}`
         );
 
         res.status(201).json({ message: 'Blood request posted!', request_id: result.insertId });

@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const db = require('../config/db');
+const { createNotification, getPostOwnerAndContext } = require('../utils/notify');
 require('dotenv').config();
 
 // A fixed, reserved marker email used to represent the admin as a "user" row
@@ -310,15 +311,17 @@ exports.addAdminComment = async (req, res) => {
         }
 
         let parentId = null;
+        let parentAuthorId = null;
         if (parent_comment_id) {
             const [parentRows] = await db.query(
-                'SELECT comment_id FROM comments WHERE comment_id = ? AND post_type = ? AND post_id = ?',
+                'SELECT comment_id, user_id FROM comments WHERE comment_id = ? AND post_type = ? AND post_id = ?',
                 [parent_comment_id, post_type, post_id]
             );
             if (parentRows.length === 0) {
                 return res.status(400).json({ message: 'The comment you are replying to no longer exists.' });
             }
             parentId = parent_comment_id;
+            parentAuthorId = parentRows[0].user_id;
         }
 
         const adminUserId = await getOrCreateAdminUserId();
@@ -327,6 +330,25 @@ exports.addAdminComment = async (req, res) => {
             'INSERT INTO comments (post_type, post_id, user_id, comment_text, parent_comment_id) VALUES (?, ?, ?, ?, ?)',
             [post_type, post_id, adminUserId, comment_text.trim(), parentId]
         );
+
+        // Notify the relevant people (Admin's own account is never notified)
+        (async () => {
+            try {
+                const notified = new Set([adminUserId]);
+
+                if (parentAuthorId && !notified.has(parentAuthorId)) {
+                    await createNotification(parentAuthorId, 'general', post_id, `Admin replied to your comment`);
+                    notified.add(parentAuthorId);
+                }
+
+                const postInfo = await getPostOwnerAndContext(post_type, post_id);
+                if (postInfo && !notified.has(postInfo.owner_id)) {
+                    await createNotification(postInfo.owner_id, 'general', post_id, `Admin commented on ${postInfo.label}`);
+                }
+            } catch (notifyErr) {
+                console.error('Admin comment notification error:', notifyErr.message);
+            }
+        })();
 
         res.status(201).json({ message: 'Comment added as Admin.', comment_id: result.insertId });
     } catch (err) {

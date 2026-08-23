@@ -2,6 +2,7 @@
 // Comment Controller — simple comments on blood requests or lost&found items
 // ===================================================
 const db = require('../config/db');
+const { createNotification, getPostOwnerAndContext } = require('../utils/notify');
 
 // Add a comment to a post (blood request or item) - optionally a reply to
 // another comment on that same post via parent_comment_id
@@ -18,22 +19,45 @@ exports.addComment = async (req, res) => {
         }
 
         let parentId = null;
+        let parentAuthorId = null;
         if (parent_comment_id) {
             // The comment being replied to must exist on this same post
             const [parentRows] = await db.query(
-                'SELECT comment_id FROM comments WHERE comment_id = ? AND post_type = ? AND post_id = ?',
+                'SELECT comment_id, user_id FROM comments WHERE comment_id = ? AND post_type = ? AND post_id = ?',
                 [parent_comment_id, post_type, post_id]
             );
             if (parentRows.length === 0) {
                 return res.status(400).json({ message: 'The comment you are replying to no longer exists.' });
             }
             parentId = parent_comment_id;
+            parentAuthorId = parentRows[0].user_id;
         }
 
         const [result] = await db.query(
             'INSERT INTO comments (post_type, post_id, user_id, comment_text, parent_comment_id) VALUES (?, ?, ?, ?, ?)',
             [post_type, post_id, user_id, comment_text.trim(), parentId]
         );
+
+        // Notify the relevant people (never notify the commenter about their own action)
+        (async () => {
+            try {
+                const [[commenter]] = await db.query('SELECT name FROM users WHERE user_id = ?', [user_id]);
+                const commenterName = commenter ? commenter.name : 'Someone';
+                const notified = new Set([user_id]);
+
+                if (parentAuthorId && !notified.has(parentAuthorId)) {
+                    await createNotification(parentAuthorId, 'general', post_id, `${commenterName} replied to your comment`);
+                    notified.add(parentAuthorId);
+                }
+
+                const postInfo = await getPostOwnerAndContext(post_type, post_id);
+                if (postInfo && !notified.has(postInfo.owner_id)) {
+                    await createNotification(postInfo.owner_id, 'general', post_id, `${commenterName} commented on ${postInfo.label}`);
+                }
+            } catch (notifyErr) {
+                console.error('Comment notification error:', notifyErr.message);
+            }
+        })();
 
         res.status(201).json({ message: 'Comment added.', comment_id: result.insertId });
     } catch (err) {

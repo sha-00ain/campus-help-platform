@@ -11,6 +11,7 @@ const bloodRoutes = require('./routes/bloodRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/blood', bloodRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // simple test route
 app.get('/', (req, res) => {
