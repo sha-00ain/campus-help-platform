@@ -240,15 +240,21 @@
       flex-direction: column;
     }
 
+    /* Sticks flush at the very top (not offset by the topbar's height) so
+       there is never a gap above it that scrolling post content could show
+       through. The topbar (which auto-hides on scroll-down) sits above this
+       in z-index, so this only becomes visible as the "title bar" once the
+       topbar has slid away - and reverts to a normal section title once you
+       scroll back up and the topbar reappears. */
     .feed-header {
       position: sticky;
-      top: var(--topbar-height);
+      top: 0;
       background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(4px);
       padding: 1.5rem 2rem 1rem 2rem;
       border-bottom: 1px solid var(--border);
       border-radius: 28px 28px 0 0;
-      z-index: 2;
+      z-index: 500;
     }
 
     .feed-header h2 {
