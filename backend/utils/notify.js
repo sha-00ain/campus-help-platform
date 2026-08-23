@@ -9,12 +9,15 @@ const db = require('../config/db');
 // receive or be counted in broadcast notifications.
 const ADMIN_MARKER_EMAIL = 'system.admin@hamdarduniversity.edu.bd';
 
-// Insert one notification row
-async function createNotification(user_id, type, reference_id, message) {
+// Insert one notification row.
+// post_type ('blood' | 'item' | null) tells the frontend which page
+// reference_id points to, so a notification can be clicked straight through
+// to the post it's about.
+async function createNotification(user_id, type, reference_id, message, post_type = null) {
     try {
         await db.query(
-            'INSERT INTO notifications (user_id, type, reference_id, message) VALUES (?, ?, ?, ?)',
-            [user_id, type, reference_id, message]
+            'INSERT INTO notifications (user_id, type, reference_id, post_type, message) VALUES (?, ?, ?, ?, ?)',
+            [user_id, type, reference_id, post_type, message]
         );
     } catch (err) {
         // Notifications are a nice-to-have - never let a notification failure
@@ -24,14 +27,14 @@ async function createNotification(user_id, type, reference_id, message) {
 }
 
 // Notify every active user except the poster (used for "new post" alerts)
-async function notifyAllUsersExcept(excludeUserId, type, reference_id, message) {
+async function notifyAllUsersExcept(excludeUserId, type, reference_id, message, post_type = null) {
     try {
         const [users] = await db.query(
             'SELECT user_id FROM users WHERE user_id != ? AND is_active = TRUE AND email != ?',
             [excludeUserId, ADMIN_MARKER_EMAIL]
         );
         for (const u of users) {
-            await createNotification(u.user_id, type, reference_id, message);
+            await createNotification(u.user_id, type, reference_id, message, post_type);
         }
     } catch (err) {
         console.error('Failed to broadcast notification:', err.message);

@@ -46,13 +46,13 @@ exports.addComment = async (req, res) => {
                 const notified = new Set([user_id]);
 
                 if (parentAuthorId && !notified.has(parentAuthorId)) {
-                    await createNotification(parentAuthorId, 'general', post_id, `${commenterName} replied to your comment`);
+                    await createNotification(parentAuthorId, 'general', post_id, `${commenterName} replied to your comment`, post_type);
                     notified.add(parentAuthorId);
                 }
 
                 const postInfo = await getPostOwnerAndContext(post_type, post_id);
                 if (postInfo && !notified.has(postInfo.owner_id)) {
-                    await createNotification(postInfo.owner_id, 'general', post_id, `${commenterName} commented on ${postInfo.label}`);
+                    await createNotification(postInfo.owner_id, 'general', post_id, `${commenterName} commented on ${postInfo.label}`, post_type);
                 }
             } catch (notifyErr) {
                 console.error('Comment notification error:', notifyErr.message);

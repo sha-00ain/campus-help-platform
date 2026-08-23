@@ -93,11 +93,17 @@ CREATE TABLE notifications (
     user_id INT NOT NULL,
     type ENUM('blood_request','item_found','item_claim','event_alert','general') DEFAULT 'general',
     reference_id INT,
+    -- Which page reference_id belongs to ('blood' = blood_requests.request_id,
+    -- 'item' = items.item_id). Lets the frontend send a notification click to
+    -- the right post view. NULL for notifications that don't link anywhere.
+    post_type ENUM('blood','item') DEFAULT NULL,
     message TEXT,
     is_read BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+-- Already have an existing database? Run this instead of recreating the table:
+-- ALTER TABLE notifications ADD COLUMN post_type ENUM('blood','item') DEFAULT NULL AFTER reference_id;
 
 -- 8. COMMENTS TABLE (simple comments on blood requests or lost&found items)
 -- parent_comment_id lets a comment be a reply to another comment on the same

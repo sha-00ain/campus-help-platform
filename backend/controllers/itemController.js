@@ -25,7 +25,8 @@ exports.createItem = async (req, res) => {
             posted_by,
             item_type === 'found' ? 'item_found' : 'general',
             result.insertId,
-            `New ${item_type} item posted: ${title}`
+            `New ${item_type} item posted: ${title}`,
+            'item'
         );
 
         res.status(201).json({ message: 'Item posted successfully!', item_id: result.insertId });

@@ -28,9 +28,23 @@ async function loadItems() {
         allItems = await apiCall('/items?' + query.toString(), 'GET');
         currentItemsPage = 1;
         renderItemsPage(1);
+        openPostFromUrl();
     } catch (err) {
         document.getElementById('itemsList').innerHTML = `<div class="msg error">${err.message}</div>`;
     }
+}
+
+// Deep link support: coming from a notification (lostfound.html?post=ID)
+// opens that item's detail modal straight away.
+function openPostFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const postId = parseInt(params.get('post'), 10);
+    if (!postId) return;
+    openPostDetail(postId);
+    // Clean the URL so refreshing/sharing it later doesn't re-open the modal
+    params.delete('post');
+    const cleanUrl = window.location.pathname + (params.toString() ? `?${params}` : '');
+    window.history.replaceState({}, '', cleanUrl);
 }
 
 function renderItemsPage(page) {

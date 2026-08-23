@@ -337,13 +337,13 @@ exports.addAdminComment = async (req, res) => {
                 const notified = new Set([adminUserId]);
 
                 if (parentAuthorId && !notified.has(parentAuthorId)) {
-                    await createNotification(parentAuthorId, 'general', post_id, `Admin replied to your comment`);
+                    await createNotification(parentAuthorId, 'general', post_id, `Admin replied to your comment`, post_type);
                     notified.add(parentAuthorId);
                 }
 
                 const postInfo = await getPostOwnerAndContext(post_type, post_id);
                 if (postInfo && !notified.has(postInfo.owner_id)) {
-                    await createNotification(postInfo.owner_id, 'general', post_id, `Admin commented on ${postInfo.label}`);
+                    await createNotification(postInfo.owner_id, 'general', post_id, `Admin commented on ${postInfo.label}`, post_type);
                 }
             } catch (notifyErr) {
                 console.error('Admin comment notification error:', notifyErr.message);

@@ -78,7 +78,8 @@ exports.createRequest = async (req, res) => {
             requester_id,
             'blood_request',
             result.insertId,
-            `New blood request: ${blood_group_needed} needed at ${hospital_location}`
+            `New blood request: ${blood_group_needed} needed at ${hospital_location}`,
+            'blood'
         );
 
         res.status(201).json({ message: 'Blood request posted!', request_id: result.insertId });

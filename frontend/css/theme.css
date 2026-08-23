@@ -68,6 +68,12 @@ body {
 }
 .nav-links .logout-btn:hover { background: #fee2e2; border-color: #dc2626; transform: none; }
 
+/* Text label next to each nav icon - hidden on narrow screens (see media
+   query below) so the whole nav stays on one line, right-aligned, instead
+   of wrapping onto a second row and overlapping the page content beneath
+   the fixed topbar. */
+.nav-label { white-space: nowrap; }
+
 /* Container & cards */
 .container { max-width: 1000px; margin: 0 auto; padding: 2rem 1.5rem; }
 .card {
@@ -163,9 +169,20 @@ button.secondary:hover { background: #e2e8f0; transform: none; }
 .nav-left { display: flex; align-items: center; gap: 1rem; }
 
 @media (max-width: 600px) {
-  .topbar { flex-direction: column; align-items: flex-start; padding: 0.8rem 1rem; height: auto; min-height: var(--topbar-height); }
-  body { padding-top: 100px; }
-  :root { --topbar-height: 100px; }
+  /* Keep the topbar a single row (logo left, nav right) instead of
+     stacking - stacking is what let the nav wrap onto a second line and
+     grow taller than the fixed body padding accounted for, so the last
+     row (logout) ended up overlapping the page content underneath it. */
+  :root { --topbar-height: 64px; }
+  .topbar { padding: 0.6rem 0.9rem; }
+  body { padding-top: 64px; }
+  .logo-area { font-size: 1.05rem; gap: 0.4rem; }
+  .logo-icon { width: 34px; height: 34px; font-size: 1.1rem; border-radius: 11px; }
+  .nav-links { gap: 0.35rem; }
+  .nav-links a, .nav-links .logout-btn { padding: 0.5rem; }
+  /* Icon-only nav on mobile - there isn't room for icon + label for four
+     items next to the logo without wrapping. */
+  .nav-label { display: none; }
   .container { padding: 1rem; }
   .card { padding: 1.2rem; }
 }
@@ -331,6 +348,16 @@ button.secondary:hover { background: #e2e8f0; transform: none; }
 .notif-body { flex: 1; }
 .notif-message { font-size: 0.83rem; color: var(--text-dark); line-height: 1.35; }
 .notif-time { font-size: 0.7rem; color: #9aa7b8; margin-top: 2px; }
-@media (max-width: 480px) {
-  .notif-dropdown { width: 90vw; right: -10px; }
+@media (max-width: 600px) {
+  /* Anchor the dropdown to the viewport instead of the bell button on
+     mobile, so it always sits fully inside the screen - never cut off and
+     never overhanging past the edge - no matter where the bell ends up. */
+  .notif-dropdown {
+    position: fixed;
+    top: calc(var(--topbar-height) + 8px);
+    left: 4vw;
+    right: 4vw;
+    width: auto;
+    max-height: calc(100vh - var(--topbar-height) - 16px);
+  }
 }

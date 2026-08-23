@@ -138,6 +138,12 @@
       border-color: #dc2626;
     }
 
+    /* Text label next to each nav icon - hidden on narrow screens (see
+       responsive section below) so the nav stays on one line, right-aligned,
+       instead of wrapping and overlapping the page content beneath the
+       fixed topbar. */
+    .nav-label { white-space: nowrap; }
+
     /* ===== Notification bell ===== */
     .notif-bell-wrap { position: relative; }
     .notif-bell-btn {
@@ -175,8 +181,18 @@
     .notif-body { flex: 1; }
     .notif-message { font-size: 0.83rem; color: var(--text-dark); line-height: 1.35; }
     .notif-time { font-size: 0.7rem; color: #9aa7b8; margin-top: 2px; }
-    @media (max-width: 480px) {
-      .notif-dropdown { width: 90vw; right: -10px; }
+    @media (max-width: 768px) {
+      /* Anchor the dropdown to the viewport instead of the bell button on
+         mobile, so it always sits fully inside the screen - never cut off
+         and never overhanging past the edge - no matter where the bell is. */
+      .notif-dropdown {
+        position: fixed;
+        top: calc(var(--topbar-height) + 8px);
+        left: 4vw;
+        right: 4vw;
+        width: auto;
+        max-height: calc(100vh - var(--topbar-height) - 16px);
+      }
     }
 
     /* ===== CONTAINER ===== */
@@ -725,19 +741,26 @@
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
+      /* Keep the topbar a single row (logo left, nav right) instead of
+         stacking - stacking is what let the nav wrap onto a second line and
+         grow taller than the fixed body padding accounted for, so the
+         logout button ended up overlapping the profile name below it. */
       .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0.8rem 1rem;
-        height: auto;
-        min-height: var(--topbar-height);
+        padding: 0.6rem 0.9rem;
       }
       body {
-        padding-top: 90px;
+        padding-top: 64px;
       }
       :root {
-        --topbar-height: 90px;
+        --topbar-height: 64px;
       }
+      .logo-area { font-size: 1.05rem; gap: 0.4rem; }
+      .logo-icon { width: 34px; height: 34px; font-size: 1.1rem; border-radius: 11px; }
+      .nav-links { gap: 0.35rem; }
+      .nav-links a, .nav-links .logout-btn { padding: 0.5rem; }
+      /* Icon-only nav on mobile - no room for icon + label for four items
+         next to the logo without wrapping. */
+      .nav-label { display: none; }
       .profile-info {
         flex-direction: column;
         align-items: flex-start;
@@ -775,7 +798,7 @@
       <span>Campus<span style="color: var(--primary);">Help</span></span>
     </a>
     <nav class="nav-links">
-      <a href="home.html"><i class="fas fa-home"></i> Home</a>
+      <a href="home.html"><i class="fas fa-home"></i> <span class="nav-label">Home</span></a>
       <div class="notif-bell-wrap">
         <button class="notif-bell-btn" id="notifBell" onclick="toggleNotifDropdown()">
           <i class="fas fa-bell"></i>
@@ -789,8 +812,8 @@
           <div id="notifList"></div>
         </div>
       </div>
-      <a href="#" class="active-link"><i class="fas fa-user"></i> Profile</a>
-      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      <a href="#" class="active-link"><i class="fas fa-user"></i> <span class="nav-label">Profile</span></a>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span class="nav-label">Logout</span></button>
     </nav>
   </header>
 

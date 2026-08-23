@@ -61,9 +61,26 @@ function renderNotifList() {
     `).join('');
 }
 
+// Work out which page a notification's post lives on, so a click can jump
+// straight to it. post_type is set server-side for anything that links to a
+// post; older/legacy notifications may not have it, so fall back to type.
+function getNotifTargetUrl(n) {
+    if (!n.reference_id) return null;
+    let post_type = n.post_type;
+    if (!post_type) {
+        if (n.type === 'blood_request') post_type = 'blood';
+        else if (n.type === 'item_found') post_type = 'item';
+    }
+    if (post_type === 'blood') return `blood.html?post=${n.reference_id}`;
+    if (post_type === 'item') return `lostfound.html?post=${n.reference_id}`;
+    return null;
+}
+
 async function handleNotifClick(notification_id) {
     const n = allNotifications.find(x => x.notification_id === notification_id);
-    if (n && !n.is_read) {
+    if (!n) return;
+
+    if (!n.is_read) {
         n.is_read = true;
         updateNotifBadge();
         renderNotifList();
@@ -72,6 +89,12 @@ async function handleNotifClick(notification_id) {
         } catch (err) {
             // Non-critical - already reflected in the UI
         }
+    }
+
+    const targetUrl = getNotifTargetUrl(n);
+    if (targetUrl) {
+        closeNotifDropdown();
+        window.location.href = targetUrl;
     }
 }
 
