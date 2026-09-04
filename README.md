@@ -7,9 +7,7 @@ A fully functional full-stack web application that helps university students and
 ---
 
 ## 🌐 Live Demo
-- **Frontend:** [add your Netlify/Vercel link here]
-- **Backend API:** [add your Render link here]
-
+- **Frontend:** https://campus-help.sh010.workers.dev/
 ---
 
 ## ✨ Features
@@ -81,8 +79,7 @@ See [SETUP.md](./SETUP.md) for full step-by-step local setup instructions.
 ---
 
 ## 👥 Team
-- [Your Name] — [Student ID]
-- [Add teammates if any]
+- Md. Shakil Hossain — 315222031
 
 ## 📄 License
 Academic project for CSE421 — Software Engineering course.
